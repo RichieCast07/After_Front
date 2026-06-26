@@ -1,4 +1,5 @@
 import type { EventDTO } from "../../Data/Models/Event";
+import { formatDateTime as formatDate } from "../../../../Core/Utils/date";
 
 interface EventsPanelProps {
   events: EventDTO[];
@@ -12,13 +13,6 @@ interface EventsPanelProps {
   onEdit: (event: EventDTO) => void;
   onToggle: (id: number) => void;
   onViewDetails?: (id: number) => void;
-}
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleString("es-MX", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 }
 
 export default function EventsPanel({

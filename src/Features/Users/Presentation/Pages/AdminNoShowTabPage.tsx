@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatDateTime } from "../../../../Core/Utils/date";
 import type { TicketDTO } from "../../../Tickets/Data/Models/Ticket";
 import { ticketsUseCase } from "../../../Tickets/Domain/TicketsUseCase";
 import TicketQrModal from "../../../Tickets/Presentation/Components/TicketQrModal";
@@ -86,7 +87,7 @@ export default function AdminNoShowTabPage() {
                 <p>{ticket.cliente_telefono ?? "Sin teléfono"}</p>
                 <small>{ticket.codigo} • {ticket.evento_nombre ?? `Evento #${ticket.evento_id}`}</small>
                 <small>{ticket.rp_nombre ?? `RP #${ticket.rp_id}`} • {ticket.tipo_boleto ?? "GENERAL"}</small>
-                <small>{ticket.fecha_venta ? new Date(ticket.fecha_venta).toLocaleString("es-MX") : "Sin fecha"}</small>
+                <small>{ticket.fecha_venta ? formatDateTime(ticket.fecha_venta) : "Sin fecha"}</small>
               </div>
               <div className="collection-actions">
                 <span className="pill pill-muted">No asistió</span>

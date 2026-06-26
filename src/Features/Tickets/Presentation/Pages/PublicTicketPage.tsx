@@ -2,6 +2,7 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import "../../../Shared/Presentation/Components/dashboard-shell.css";
+import { formatDateTime } from "../../../../Core/Utils/date";
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import type { TicketDTO } from "../../Data/Models/Ticket";
 import { ticketsUseCase } from "../../Domain/TicketsUseCase";
@@ -174,7 +175,7 @@ export default function PublicTicketPage() {
               </div>
               <div className="qr-ticket-chip">
                 <small>Fecha venta</small>
-                <strong>{ticket.fecha_venta ? new Date(ticket.fecha_venta).toLocaleString("es-MX") : "-"}</strong>
+                <strong>{ticket.fecha_venta ? formatDateTime(ticket.fecha_venta) : "-"}</strong>
               </div>
               <div className="qr-ticket-chip">
                 <small>Ubicación</small>

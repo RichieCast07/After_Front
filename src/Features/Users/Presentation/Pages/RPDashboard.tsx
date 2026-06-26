@@ -1,5 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import UserContext from "../../../../Core/Context/UserContext";
+import { formatDateTime } from "../../../../Core/Utils/date";
 import { clientsUseCase } from "../../../Clients/Domain/ClientsUseCase";
 import type { EventTicketTypeDTO } from "../../../Events/Data/Models/TicketType";
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
@@ -218,7 +219,7 @@ export default function RPDashboard() {
                       <p>{ticket.cliente_telefono ?? "Sin teléfono"}</p>
                       <small>{ticket.codigo}</small>
                       <small>{ticket.tipo_boleto ?? "GENERAL"} • {ticket.fase_nombre ?? `Fase #${ticket.fase_id}`}</small>
-                      <small>{ticket.fecha_venta ? new Date(ticket.fecha_venta).toLocaleString("es-MX") : "Sin fecha"}</small>
+                      <small>{ticket.fecha_venta ? formatDateTime(ticket.fecha_venta) : "Sin fecha"}</small>
                     </div>
                     <span className="pill pill-success">${Number(ticket.precio).toFixed(2)}</span>
                   </article>

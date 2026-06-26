@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UserContext from "../../../../Core/Context/UserContext";
+import { formatDateTime } from "../../../../Core/Utils/date";
 import type { EventDTO } from "../../../Events/Data/Models/Event";
 import type { EventTicketTypeDTO, PhaseTicketTypePriceDTO } from "../../../Events/Data/Models/TicketType";
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
@@ -206,7 +207,7 @@ export default function AdminEventDetailPage() {
             <h2>{event?.nombre ?? "Cargando..."}</h2>
             {event ? (
               <p className="muted-copy event-detail-meta">
-                {event.lugar} • {new Date(event.fecha_evento).toLocaleString("es-MX")}
+                {event.lugar} • {formatDateTime(event.fecha_evento)}
               </p>
             ) : null}
           </div>

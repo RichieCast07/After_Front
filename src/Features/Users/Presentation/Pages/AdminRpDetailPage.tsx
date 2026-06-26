@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import UserContext from "../../../../Core/Context/UserContext";
+import { formatDateTime } from "../../../../Core/Utils/date";
 import DashboardShell from "../../../Shared/Presentation/Components/DashboardShell";
 import type { TicketDTO } from "../../../Tickets/Data/Models/Ticket";
 import { ticketsUseCase } from "../../../Tickets/Domain/TicketsUseCase";
@@ -160,7 +161,7 @@ export default function AdminRpDetailPage() {
                 <p>{ticket.cliente_nombre ?? `Cliente #${ticket.cliente_id}`}</p>
                 <small>{ticket.cliente_telefono ?? "Sin teléfono"} • {ticket.evento_nombre ?? `Evento #${ticket.evento_id}`}</small>
                 <small>{ticket.tipo_boleto ?? "GENERAL"} • {ticket.fase_nombre ?? `Fase #${ticket.fase_id}`}</small>
-                <small>{ticket.fecha_venta ? new Date(ticket.fecha_venta).toLocaleString("es-MX") : "Sin fecha"}</small>
+                <small>{ticket.fecha_venta ? formatDateTime(ticket.fecha_venta) : "Sin fecha"}</small>
               </div>
               <div className="collection-actions">
                 <span className={`pill ${ticket.estado === "USADO" ? "pill-success" : "pill-muted"}`}>{ticket.estado}</span>

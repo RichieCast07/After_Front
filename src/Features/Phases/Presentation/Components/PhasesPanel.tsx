@@ -1,4 +1,5 @@
 import type { PhaseDTO } from "../../Data/Models/Phase";
+import { formatDateOnly } from "../../../../Core/Utils/date";
 
 interface PhasesPanelProps {
   eventName?: string;
@@ -50,7 +51,7 @@ export default function PhasesPanel({
                 <h3>{phase.nombre}</h3>
                 <p>${Number(phase.precio).toFixed(2)}</p>
                 <small>
-                  {new Date(phase.fecha_inicio).toLocaleDateString("es-MX")} - {new Date(phase.fecha_fin).toLocaleDateString("es-MX")}
+                  {formatDateOnly(phase.fecha_inicio)} - {formatDateOnly(phase.fecha_fin)}
                 </small>
               </div>
               <div className="collection-actions">

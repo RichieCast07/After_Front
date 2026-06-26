@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatDateOnly, formatDateTime, formatTimeOnly } from "../../../../Core/Utils/date";
 import MetricsPanel from "../../../Metrics/Presentation/Components/MetricsPanel";
 import { useMetricsViewModel } from "../../../Metrics/Presentation/ViewModels/useMetricsViewModel";
 import FormModal from "../../../Shared/Presentation/Components/FormModal";
@@ -157,11 +158,11 @@ export default function AdminMetricsTabPage() {
               </article>
               <article className="detail-card">
                 <small>Fecha</small>
-                <p>{detailTicket.fecha_venta ? new Date(detailTicket.fecha_venta).toLocaleDateString("es-MX") : "-"}</p>
+                <p>{detailTicket.fecha_venta ? formatDateOnly(detailTicket.fecha_venta) : "-"}</p>
               </article>
               <article className="detail-card">
                 <small>Hora</small>
-                <p>{detailTicket.fecha_venta ? new Date(detailTicket.fecha_venta).toLocaleTimeString("es-MX") : "-"}</p>
+                <p>{detailTicket.fecha_venta ? formatTimeOnly(detailTicket.fecha_venta) : "-"}</p>
               </article>
               <article className="detail-card">
                 <small>Precio</small>
@@ -193,7 +194,7 @@ export default function AdminMetricsTabPage() {
               </article>
               <article className="detail-card">
                 <small>Fecha de uso</small>
-                <p>{detailTicket.fecha_uso ? new Date(detailTicket.fecha_uso).toLocaleString("es-MX") : "-"}</p>
+                <p>{detailTicket.fecha_uso ? formatDateTime(detailTicket.fecha_uso) : "-"}</p>
               </article>
             </div>
           </div>
