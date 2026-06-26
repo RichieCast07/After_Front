@@ -10,6 +10,7 @@ interface TeamPanelProps {
   onCreateClick?: () => void;
   onEdit?: (user: UserResponseDTO) => void;
   onDelete?: (user: UserResponseDTO) => void;
+  onToggleActive?: (user: UserResponseDTO) => void;
 }
 
 function getRoleLabel(roleId: number) {
@@ -29,6 +30,7 @@ export default function TeamPanel({
   onCreateClick,
   onEdit,
   onDelete,
+  onToggleActive,
 }: TeamPanelProps) {
   return (
     <section className="glass-panel panel-grid">
@@ -82,6 +84,11 @@ export default function TeamPanel({
                 {onEdit ? (
                   <button type="button" className="ghost-button" onClick={() => onEdit(user)}>
                     Editar
+                  </button>
+                ) : null}
+                {onToggleActive && user.id !== currentUserId ? (
+                  <button type="button" className="ghost-button" onClick={() => onToggleActive(user)}>
+                    {user.activo ? "Desactivar" : "Activar"}
                   </button>
                 ) : null}
                 {onDelete && user.id !== currentUserId ? (

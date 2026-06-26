@@ -46,6 +46,7 @@ export default function AdminTeamTabPage() {
         onCreateClick={() => setIsModalOpen(true)}
         onEdit={handleEdit}
         onDelete={(user) => void handleDelete(user)}
+        onToggleActive={(user) => void teamVm.toggleActive(user)}
       />
 
       {isModalOpen ? (

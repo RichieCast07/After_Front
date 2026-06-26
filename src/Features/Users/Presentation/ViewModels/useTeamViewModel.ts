@@ -142,6 +142,18 @@ export function useTeamViewModel() {
     }
   };
 
+  const toggleActive = async (user: UserResponseDTO) => {
+    setError("");
+    try {
+      await teamUseCase.updateUser(user.id, { activo: !user.activo });
+      await loadUsers();
+      return true;
+    } catch (toggleError) {
+      setError(toggleError instanceof Error ? toggleError.message : "No fue posible actualizar el estado del usuario.");
+      return false;
+    }
+  };
+
   return {
     users,
     selectedRole,
@@ -156,6 +168,7 @@ export function useTeamViewModel() {
     resetForm,
     submit,
     deleteUser,
+    toggleActive,
     reload: loadUsers,
   };
 }
