@@ -1,6 +1,7 @@
 import type { LoginResponseDTO } from "../Models/LoginResponseDTO"
 import { apiRequest } from "../../../../Core/Api/apiClient";
 import type { RegisterUserDTO } from "../Models/RegisterUserDTO";
+import type { UpdateUserDTO } from "../Models/UpdateUserDTO";
 import type { RegisterUserResponseDTO, UsersListResponseDTO } from "../Models/UserResponseDTO";
 
 export class UserRepository {
@@ -24,6 +25,19 @@ export class UserRepository {
         return apiRequest<RegisterUserResponseDTO>("users", {
             method: "POST",
             body: payload,
+        });
+    }
+
+    updateUser(id: number, payload: UpdateUserDTO): Promise<RegisterUserResponseDTO> {
+        return apiRequest<RegisterUserResponseDTO>(`users/${id}`, {
+            method: "PUT",
+            body: payload,
+        });
+    }
+
+    deleteUser(id: number): Promise<{ success: boolean; message: string }> {
+        return apiRequest(`users/${id}`, {
+            method: "DELETE",
         });
     }
 

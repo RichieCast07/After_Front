@@ -1,17 +1,37 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
+import UserContext from "../../../../Core/Context/UserContext";
 import FormModal from "../../../Shared/Presentation/Components/FormModal";
+import type { UserResponseDTO } from "../../Data/Models/UserResponseDTO";
 import TeamPanel from "../Components/TeamPanel";
 import { useTeamViewModel } from "../ViewModels/useTeamViewModel";
 
 export default function AdminTeamTabPage() {
   const teamVm = useTeamViewModel();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const userContext = useContext(UserContext);
 
   const submit = async () => {
     const success = await teamVm.submit();
     if (success) {
       setIsModalOpen(false);
     }
+  };
+
+  const handleEdit = (user: UserResponseDTO) => {
+    teamVm.handleEdit(user);
+    setIsModalOpen(true);
+  };
+
+  const handleClose = () => {
+    teamVm.resetForm();
+    setIsModalOpen(false);
+  };
+
+  const handleDelete = async (user: UserResponseDTO) => {
+    if (!window.confirm(`¿Eliminar a ${user.nombre_completo} (@${user.username})? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+    await teamVm.deleteUser(user.id);
   };
 
   return (
@@ -22,11 +42,18 @@ export default function AdminTeamTabPage() {
         setSelectedRole={teamVm.setSelectedRole}
         loading={teamVm.loading}
         error={teamVm.error}
+        currentUserId={userContext?.user?.user_id}
         onCreateClick={() => setIsModalOpen(true)}
+        onEdit={handleEdit}
+        onDelete={(user) => void handleDelete(user)}
       />
 
       {isModalOpen ? (
-        <FormModal title="Crear usuario operativo" subtitle="Equipo" onClose={() => setIsModalOpen(false)}>
+        <FormModal
+          title={teamVm.editingId ? "Editar usuario" : "Crear usuario operativo"}
+          subtitle="Equipo"
+          onClose={handleClose}
+        >
           <div className="field-grid">
             <label>
               <span>Nombre completo</span>
@@ -41,12 +68,16 @@ export default function AdminTeamTabPage() {
               <input value={String(teamVm.form.telefono || "")} onChange={(event) => teamVm.handleChange("telefono", event.target.value)} />
             </label>
             <label>
-              <span>Contraseña</span>
+              <span>Contraseña{teamVm.editingId ? " (dejar en blanco para no cambiarla)" : ""}</span>
               <input type="password" value={teamVm.form.password} onChange={(event) => teamVm.handleChange("password", event.target.value)} />
             </label>
             <label>
               <span>Rol</span>
-              <select value={teamVm.form.rol_id} onChange={(event) => teamVm.handleChange("rol_id", Number(event.target.value))}>
+              <select
+                value={teamVm.form.rol_id}
+                disabled={Boolean(teamVm.editingId)}
+                onChange={(event) => teamVm.handleChange("rol_id", Number(event.target.value))}
+              >
                 <option value={2}>RP</option>
                 <option value={3}>Manager</option>
               </select>
@@ -68,9 +99,9 @@ export default function AdminTeamTabPage() {
 
           <div className="action-row">
             <button type="button" className="primary-button" disabled={teamVm.saving} onClick={() => void submit()}>
-              {teamVm.saving ? "Guardando..." : "Crear"}
+              {teamVm.saving ? "Guardando..." : teamVm.editingId ? "Guardar" : "Crear"}
             </button>
-            <button type="button" className="ghost-button" onClick={() => setIsModalOpen(false)}>
+            <button type="button" className="ghost-button" onClick={handleClose}>
               Cancelar
             </button>
           </div>

@@ -16,6 +16,7 @@ export function useTeamViewModel() {
   const [users, setUsers] = useState<UserResponseDTO[]>([]);
   const [selectedRole, setSelectedRole] = useState<number>(0);
   const [form, setForm] = useState<RegisterUserDTO>(initialForm);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -45,6 +46,19 @@ export function useTeamViewModel() {
 
   const resetForm = () => {
     setForm(initialForm);
+    setEditingId(null);
+  };
+
+  const handleEdit = (user: UserResponseDTO) => {
+    setForm({
+      nombre_completo: user.nombre_completo,
+      username: user.username,
+      telefono: Number(user.telefono) || 0,
+      password: "",
+      rol_id: user.rol_id,
+      comision_porcentaje: Number(user.comision_porcentaje ?? 10),
+    });
+    setEditingId(user.id);
   };
 
   const submit = async () => {
@@ -54,8 +68,13 @@ export function useTeamViewModel() {
     const roleId = Number(form.rol_id);
     const commission = Number(form.comision_porcentaje ?? 10);
 
-    if (!cleanName || !cleanUsername || !form.password || !phoneAsString) {
+    if (!cleanName || !cleanUsername || !phoneAsString) {
       setError("Todos los campos son obligatorios.");
+      return false;
+    }
+
+    if (!editingId && !form.password) {
+      setError("La contraseña es obligatoria al crear un usuario.");
       return false;
     }
 
@@ -64,7 +83,7 @@ export function useTeamViewModel() {
       return false;
     }
 
-    if (form.password.length < 8) {
+    if (form.password && form.password.length < 8) {
       setError("La contraseña debe tener al menos 8 caracteres.");
       return false;
     }
@@ -82,22 +101,44 @@ export function useTeamViewModel() {
     setSaving(true);
     setError("");
     try {
-      await teamUseCase.createUser({
-        ...form,
-        nombre_completo: cleanName,
-        username: cleanUsername,
-        telefono: Number(phoneAsString),
-        rol_id: roleId,
-        comision_porcentaje: roleId === 2 ? commission : 0,
-      });
+      if (editingId) {
+        await teamUseCase.updateUser(editingId, {
+          nombre_completo: cleanName,
+          username: cleanUsername,
+          telefono: Number(phoneAsString),
+          comision_porcentaje: roleId === 2 ? commission : 0,
+          ...(form.password ? { password: form.password } : {}),
+        });
+      } else {
+        await teamUseCase.createUser({
+          ...form,
+          nombre_completo: cleanName,
+          username: cleanUsername,
+          telefono: Number(phoneAsString),
+          rol_id: roleId,
+          comision_porcentaje: roleId === 2 ? commission : 0,
+        });
+      }
       resetForm();
       await loadUsers();
       return true;
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "No fue posible crear el usuario.");
+      setError(submitError instanceof Error ? submitError.message : "No fue posible guardar el usuario.");
       return false;
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteUser = async (id: number) => {
+    setError("");
+    try {
+      await teamUseCase.deleteUser(id);
+      await loadUsers();
+      return true;
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "No fue posible eliminar el usuario.");
+      return false;
     }
   };
 
@@ -106,12 +147,15 @@ export function useTeamViewModel() {
     selectedRole,
     setSelectedRole,
     form,
+    editingId,
     loading,
     saving,
     error,
     handleChange,
+    handleEdit,
     resetForm,
     submit,
+    deleteUser,
     reload: loadUsers,
   };
 }

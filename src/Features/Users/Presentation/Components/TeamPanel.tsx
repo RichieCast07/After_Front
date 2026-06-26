@@ -6,7 +6,10 @@ interface TeamPanelProps {
   setSelectedRole: (roleId: number) => void;
   loading: boolean;
   error: string;
+  currentUserId?: number;
   onCreateClick?: () => void;
+  onEdit?: (user: UserResponseDTO) => void;
+  onDelete?: (user: UserResponseDTO) => void;
 }
 
 function getRoleLabel(roleId: number) {
@@ -22,7 +25,10 @@ export default function TeamPanel({
   setSelectedRole,
   loading,
   error,
+  currentUserId,
   onCreateClick,
+  onEdit,
+  onDelete,
 }: TeamPanelProps) {
   return (
     <section className="glass-panel panel-grid">
@@ -73,6 +79,16 @@ export default function TeamPanel({
                 <span className={`pill ${user.activo ? "pill-success" : "pill-muted"}`}>
                   {user.activo ? "Activo" : "Inactivo"}
                 </span>
+                {onEdit ? (
+                  <button type="button" className="ghost-button" onClick={() => onEdit(user)}>
+                    Editar
+                  </button>
+                ) : null}
+                {onDelete && user.id !== currentUserId ? (
+                  <button type="button" className="ghost-button" onClick={() => onDelete(user)}>
+                    Eliminar
+                  </button>
+                ) : null}
               </div>
             </article>
           ))}
