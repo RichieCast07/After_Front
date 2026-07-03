@@ -6,7 +6,6 @@ import type { EventTicketTypeDTO } from "../../../Events/Data/Models/TicketType"
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import EventsPanel from "../../../Events/Presentation/Components/EventsPanel";
 import { useEventsViewModel } from "../../../Events/Presentation/ViewModels/useEventsViewModel";
-import { useMetricsViewModel } from "../../../Metrics/Presentation/ViewModels/useMetricsViewModel";
 import { usePhasesViewModel } from "../../../Phases/Presentation/ViewModels/usePhasesViewModel";
 import DashboardShell from "../../../Shared/Presentation/Components/DashboardShell";
 import type { TicketDTO } from "../../../Tickets/Data/Models/Ticket";
@@ -21,7 +20,6 @@ export default function RPDashboard() {
     eventId: eventsVm.selectedEventId,
     defaultRpId: session?.user?.user_id ?? 0,
   });
-  const metricsVm = useMetricsViewModel(eventsVm.selectedEventId);
   const [activeTab, setActiveTab] = useState("eventos");
   const [clientLookupMessage, setClientLookupMessage] = useState("");
   const [selectedTicketForQr, setSelectedTicketForQr] = useState<TicketDTO | null>(null);
@@ -227,27 +225,6 @@ export default function RPDashboard() {
                 {filteredRpTicketsByEvent.length === 0 ? (
                   <p className="muted-copy">No se encontraron boletos para ese teléfono.</p>
                 ) : null}
-              </div>
-            </div>
-
-            <div className="rp-sales-column">
-              <div className="panel-heading">
-                <div>
-                  <span className="eyebrow">Ranking RPs</span>
-                  <h2>Top del evento</h2>
-                </div>
-              </div>
-              <div className="collection-list compact-list rp-sales-list">
-                {metricsVm.eventRpMetrics.map((metric, index) => (
-                  <article key={metric.rp_id} className="collection-card compact-ticket-card rp-compact-card rp-ranking-card">
-                    <div className="rp-rank-badge">#{index + 1}</div>
-                    <div className="rp-compact-main">
-                      <h3>{metric.username}</h3>
-                      <p>{metric.boletos_vendidos} boletos</p>
-                    </div>
-                    <span className="pill pill-success">${Number(metric.ingresos_totales).toFixed(2)}</span>
-                  </article>
-                ))}
               </div>
             </div>
           </div>
