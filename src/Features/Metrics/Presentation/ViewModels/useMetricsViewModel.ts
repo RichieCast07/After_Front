@@ -19,6 +19,7 @@ export function useMetricsViewModel(eventId: number | null) {
   const loadMetrics = async () => {
     setLoading(true);
     try {
+      await metricsUseCase.syncPrices(eventId ?? undefined).catch(() => {});
       const [summaryData, rpData] = await Promise.all([
         metricsUseCase.getSummary(),
         metricsUseCase.getRpMetrics(),

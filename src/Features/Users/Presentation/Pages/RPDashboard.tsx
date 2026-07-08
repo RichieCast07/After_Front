@@ -6,6 +6,7 @@ import type { EventTicketTypeDTO } from "../../../Events/Data/Models/TicketType"
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import EventsPanel from "../../../Events/Presentation/Components/EventsPanel";
 import { useEventsViewModel } from "../../../Events/Presentation/ViewModels/useEventsViewModel";
+import { metricsUseCase } from "../../../Metrics/Domain/MetricsUseCase";
 import { usePhasesViewModel } from "../../../Phases/Presentation/ViewModels/usePhasesViewModel";
 import DashboardShell from "../../../Shared/Presentation/Components/DashboardShell";
 import type { TicketDTO } from "../../../Tickets/Data/Models/Ticket";
@@ -79,6 +80,13 @@ export default function RPDashboard() {
     if (eventsVm.selectedEventId && activeTab === "eventos") {
       setActiveTab("detalle");
     }
+  }, [eventsVm.selectedEventId]);
+
+  useEffect(() => {
+    if (!eventsVm.selectedEventId) return;
+    void metricsUseCase.syncPrices(eventsVm.selectedEventId)
+      .then(() => ticketsVm.reloadRpTickets())
+      .catch(() => {});
   }, [eventsVm.selectedEventId]);
 
   useEffect(() => {
