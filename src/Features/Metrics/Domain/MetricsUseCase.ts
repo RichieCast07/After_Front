@@ -8,4 +8,5 @@ export const metricsUseCase = {
   getEventMetrics: (eventId: number) => repository.getEventMetrics(eventId),
   getEventRpMetrics: (eventId: number) => repository.getEventRpMetrics(eventId),
   getEventPhaseMetrics: (eventId: number) => repository.getEventPhaseMetrics(eventId),
+  syncPrices: (eventoId?: number) => repository.syncPrices(eventoId),
 };

@@ -26,4 +26,9 @@ export class MetricsRepository {
   getEventPhaseMetrics(eventId: number) {
     return apiRequest<EventPhaseMetricDTO[]>(`metrics/event/${eventId}/phases`);
   }
+
+  syncPrices(eventoId?: number) {
+    const path = eventoId ? `metrics/sync-prices/${eventoId}` : "metrics/sync-prices";
+    return apiRequest<{ success: boolean; updated: number }>(path, { method: "POST" });
+  }
 }

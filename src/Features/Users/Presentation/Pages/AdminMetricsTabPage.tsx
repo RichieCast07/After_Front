@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDateOnly, formatDateTime, formatTimeOnly } from "../../../../Core/Utils/date";
+import { metricsUseCase } from "../../../Metrics/Domain/MetricsUseCase";
 import MetricsPanel from "../../../Metrics/Presentation/Components/MetricsPanel";
 import { useMetricsViewModel } from "../../../Metrics/Presentation/ViewModels/useMetricsViewModel";
 import FormModal from "../../../Shared/Presentation/Components/FormModal";
@@ -18,6 +19,18 @@ export default function AdminMetricsTabPage() {
   const [ticketsLoading, setTicketsLoading] = useState(false);
   const [ticketsError, setTicketsError] = useState("");
   const [soldTickets, setSoldTickets] = useState<TicketDTO[]>([]);
+  const reloadRef = useRef(metricsVm.reload);
+  reloadRef.current = metricsVm.reload;
+
+  useEffect(() => {
+    const interval = setInterval(() => void reloadRef.current(), 30_000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    void metricsUseCase.syncPrices(eventsVm.selectedEventId ?? undefined).catch(() => {});
+  }, [eventsVm.selectedEventId]);
+
   const [detailTicket, setDetailTicket] = useState<TicketDTO | null>(null);
   const [ticketSearch, setTicketSearch] = useState("");
 
@@ -80,6 +93,7 @@ export default function AdminMetricsTabPage() {
         phaseMetrics={metricsVm.phaseMetrics}
         loading={metricsVm.loading}
         error={metricsVm.error}
+        onRefresh={() => void metricsVm.reload()}
         onOpenSoldTickets={selectedEvent ? () => void openSoldTicketsModal() : undefined}
         onSelectRp={(rpId) => {
           if (selectedEvent) {

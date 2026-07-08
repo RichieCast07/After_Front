@@ -16,6 +16,7 @@ interface MetricsPanelProps {
   compact?: boolean;
   onSelectRp?: (rpId: number) => void;
   onOpenSoldTickets?: () => void;
+  onRefresh?: () => void;
 }
 
 function formatCurrency(value: number) {
@@ -37,6 +38,7 @@ export default function MetricsPanel({
   compact = false,
   onSelectRp,
   onOpenSoldTickets,
+  onRefresh,
 }: MetricsPanelProps) {
   const personalMetric = currentUserId ? rpMetrics.find((metric) => metric.rp_id === currentUserId) : null;
 
@@ -47,6 +49,11 @@ export default function MetricsPanel({
           <span className="eyebrow">Metrics</span>
           <h2>{compact ? "Ritmo comercial" : "Monitoreo en tiempo real"}</h2>
         </div>
+        {onRefresh ? (
+          <button type="button" className="ghost-button" onClick={onRefresh} disabled={loading}>
+            {loading ? "Actualizando..." : "Actualizar"}
+          </button>
+        ) : null}
       </div>
 
       {loading ? <p className="muted-copy">Actualizando metricas...</p> : null}
