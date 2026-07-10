@@ -40,6 +40,10 @@ export class ClientsRepository {
     return apiRequest<ClientDTO>(`clients/search?telefono=${encodeURIComponent(phone)}`);
   }
 
+  updateClient(id: number, data: { nombre_completo?: string; telefono?: string }) {
+    return apiRequest<ClientDTO>(`clients/${id}`, { method: "PATCH", body: data });
+  }
+
   async downloadClientsCsv() {
     const token = getToken();
     const response = await fetch(new URL("clients/export/csv", normalizeBaseUrl()).toString(), {

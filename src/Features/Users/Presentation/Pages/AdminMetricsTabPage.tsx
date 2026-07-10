@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatDateOnly, formatDateTime, formatTimeOnly } from "../../../../Core/Utils/date";
+import { clientsUseCase } from "../../../Clients/Domain/ClientsUseCase";
 import MetricsPanel from "../../../Metrics/Presentation/Components/MetricsPanel";
 import { useMetricsViewModel } from "../../../Metrics/Presentation/ViewModels/useMetricsViewModel";
 import FormModal from "../../../Shared/Presentation/Components/FormModal";
@@ -28,6 +29,10 @@ export default function AdminMetricsTabPage() {
 
   const [detailTicket, setDetailTicket] = useState<TicketDTO | null>(null);
   const [ticketSearch, setTicketSearch] = useState("");
+  const [editingClient, setEditingClient] = useState(false);
+  const [editClientForm, setEditClientForm] = useState({ nombre_completo: "", telefono: "" });
+  const [editClientSaving, setEditClientSaving] = useState(false);
+  const [editClientError, setEditClientError] = useState("");
 
   const filteredTickets = useMemo(() => {
     const search = ticketSearch.trim().toLowerCase();
@@ -55,6 +60,37 @@ export default function AdminMetricsTabPage() {
       setDetailTicket(null);
     }
   }, [filteredTickets, detailTicket]);
+
+  const openEditClient = () => {
+    if (!detailTicket) return;
+    setEditClientForm({
+      nombre_completo: detailTicket.cliente_nombre ?? "",
+      telefono: detailTicket.cliente_telefono ?? "",
+    });
+    setEditClientError("");
+    setEditingClient(true);
+  };
+
+  const saveEditClient = async () => {
+    if (!detailTicket?.cliente_id) return;
+    setEditClientSaving(true);
+    setEditClientError("");
+    try {
+      await clientsUseCase.updateClient(detailTicket.cliente_id, {
+        nombre_completo: editClientForm.nombre_completo.trim() || undefined,
+        telefono: editClientForm.telefono.trim() || undefined,
+      });
+      const tickets = await ticketsUseCase.getTicketsByEventId(detailTicket.evento_id);
+      setSoldTickets(tickets);
+      const refreshed = tickets.find((t) => t.id === detailTicket.id);
+      setDetailTicket(refreshed ?? null);
+      setEditingClient(false);
+    } catch (err) {
+      setEditClientError(err instanceof Error ? err.message : "No se pudo actualizar el cliente.");
+    } finally {
+      setEditClientSaving(false);
+    }
+  };
 
   const openSoldTicketsModal = async () => {
     if (!selectedEvent) {
@@ -151,7 +187,7 @@ export default function AdminMetricsTabPage() {
         <FormModal
           title={`Boleto ${detailTicket.codigo}`}
           subtitle="Información del boleto"
-          onClose={() => setDetailTicket(null)}
+          onClose={() => { setDetailTicket(null); setEditingClient(false); }}
         >
           <div className="ticket-detail-pane">
             <div className="highlight-card">
@@ -159,6 +195,52 @@ export default function AdminMetricsTabPage() {
               <span>{detailTicket.cliente_nombre ?? `Cliente #${detailTicket.cliente_id}`}</span>
               <small>{detailTicket.cliente_telefono ?? "Sin teléfono"}</small>
             </div>
+
+            {editingClient ? (
+              <div className="edit-client-form">
+                <div className="form-field">
+                  <label htmlFor="edit-nombre">Nombre</label>
+                  <input
+                    id="edit-nombre"
+                    value={editClientForm.nombre_completo}
+                    onChange={(e) => setEditClientForm((f) => ({ ...f, nombre_completo: e.target.value }))}
+                    disabled={editClientSaving}
+                  />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="edit-telefono">Teléfono</label>
+                  <input
+                    id="edit-telefono"
+                    value={editClientForm.telefono}
+                    onChange={(e) => setEditClientForm((f) => ({ ...f, telefono: e.target.value }))}
+                    disabled={editClientSaving}
+                  />
+                </div>
+                {editClientError ? <p className="inline-error">{editClientError}</p> : null}
+                <div className="form-actions">
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => void saveEditClient()}
+                    disabled={editClientSaving}
+                  >
+                    {editClientSaving ? "Guardando..." : "Guardar"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setEditingClient(false)}
+                    disabled={editClientSaving}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button type="button" className="btn btn-secondary" onClick={openEditClient}>
+                Editar cliente
+              </button>
+            )}
 
             <div className="detail-grid ticket-detail-grid">
               <article className="detail-card">
