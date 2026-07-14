@@ -41,6 +41,16 @@ export default function RPDashboard() {
     const comision = rpTicketsByEvent.reduce((acc, ticket) => acc + Number(ticket.comision_rp || 0), 0);
     return { boletos, ingresos, comision };
   }, [rpTicketsByEvent]);
+  const rpPhaseStats = useMemo(() => {
+    const map = new Map<string, { boletos: number; ingresos: number }>();
+    for (const ticket of rpTicketsByEvent) {
+      const key = ticket.fase_nombre ?? `Fase #${ticket.fase_id}`;
+      const current = map.get(key) ?? { boletos: 0, ingresos: 0 };
+      map.set(key, { boletos: current.boletos + 1, ingresos: current.ingresos + Number(ticket.precio || 0) });
+    }
+    return Array.from(map.entries()).map(([nombre, stats]) => ({ nombre, ...stats }));
+  }, [rpTicketsByEvent]);
+
   const filteredRpTicketsByEvent = useMemo(() => {
     const cleanFilter = salesPhoneFilter.replace(/\D/g, "");
 
@@ -186,6 +196,25 @@ export default function RPDashboard() {
               <strong>${rpSummary.comision.toFixed(2)}</strong>
             </article>
           </div>
+
+          {rpPhaseStats.length > 0 ? (
+            <div className="phase-breakdown">
+              <h3>Tus boletos por fase</h3>
+              <div className="collection-list compact-list">
+                {rpPhaseStats.map((phase) => (
+                  <article key={phase.nombre} className="collection-card compact-ticket-card rp-compact-card">
+                    <div className="rp-compact-main">
+                      <h3>{phase.nombre}</h3>
+                    </div>
+                    <div className="collection-actions metrics-compact-actions">
+                      <span className="pill">{phase.boletos} boletos</span>
+                      <span className="pill pill-success">${phase.ingresos.toFixed(2)}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <div className="panel-grid panel-grid-wide rp-sales-grid">
             <div className="rp-sales-column">

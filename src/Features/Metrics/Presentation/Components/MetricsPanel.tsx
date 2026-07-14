@@ -120,6 +120,26 @@ export default function MetricsPanel({
         </div>
       ) : null}
 
+      {phaseMetrics.length > 0 ? (
+        <div className="phase-breakdown">
+          <h3>Boletos por fase</h3>
+          <div className="collection-list compact-list">
+            {phaseMetrics.map((phase) => (
+              <article key={phase.fase_id} className="collection-card compact-ticket-card rp-compact-card">
+                <div className="rp-compact-main">
+                  <h3>{phase.nombre}</h3>
+                  <p>{formatCurrency(phase.precio)} / boleto</p>
+                </div>
+                <div className="collection-actions metrics-compact-actions">
+                  <span className="pill">{phase.boletos_vendidos} boletos</span>
+                  <span className="pill pill-success">{formatCurrency(Number(phase.ingresos_totales) || 0)}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       {!compact && rpMetrics.length > 0 ? (
         <div className="leaderboard-wrap">
           <h3>{eventMetrics ? "Top 10 RPs del evento" : "Top 10 RPs por boletos vendidos"}</h3>
