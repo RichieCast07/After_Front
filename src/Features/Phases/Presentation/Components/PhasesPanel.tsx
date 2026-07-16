@@ -46,29 +46,29 @@ export default function PhasesPanel({
 
         <div className="collection-list">
           {phases.map((phase) => (
-            <article key={phase.id} className="collection-card">
-              <div>
+            <article key={phase.id} className="collection-card list-card">
+              <div className="list-card-info">
                 <h3>{phase.nombre}</h3>
                 <p>${Number(phase.precio).toFixed(2)}</p>
                 <small>
                   {formatDateOnly(phase.fecha_inicio)} - {formatDateOnly(phase.fecha_fin)}
                 </small>
               </div>
-              <div className="collection-actions">
-                <span className={`pill ${phase.activa ? "pill-success" : "pill-muted"}`}>
+              <div className="list-card-badges">
+                <span className={`pill pill-status ${phase.activa ? "pill-success is-active" : "pill-muted"}`}>
                   {phase.activa ? "Activa" : "Inactiva"}
                 </span>
-                {!readOnly ? (
-                  <>
-                    <button type="button" className="ghost-button" onClick={() => onEdit(phase)}>
-                      Editar
-                    </button>
-                    <button type="button" className="ghost-button" onClick={() => onToggle(phase.id)}>
-                      {phase.activa ? "Cerrar" : "Reabrir"}
-                    </button>
-                  </>
-                ) : null}
               </div>
+              {!readOnly ? (
+                <div className="list-card-actions">
+                  <button type="button" className="ghost-button" onClick={() => onEdit(phase)}>
+                    Editar
+                  </button>
+                  <button type="button" className="ghost-button" onClick={() => onToggle(phase.id)}>
+                    {phase.activa ? "Cerrar" : "Reabrir"}
+                  </button>
+                </div>
+              ) : null}
             </article>
           ))}
         </div>

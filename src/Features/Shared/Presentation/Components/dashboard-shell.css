@@ -71,7 +71,7 @@
 .collection-card small,
 .detail-card small,
 .selector-card span {
-  color: rgba(236, 240, 241, 0.72);
+  color: var(--text-secondary);
 }
 
 .eyebrow {
@@ -182,8 +182,8 @@
 .field-grid select:focus,
 .inline-search input:focus,
 .select-frame select:focus {
-  border-color: rgba(52, 152, 219, 0.9);
-  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.14);
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 4px var(--brand-primary-subtle);
 }
 
 .inline-search,
@@ -276,13 +276,39 @@
 }
 
 .pill-success {
-  background: rgba(39, 174, 96, 0.18);
-  color: #8ff0b0;
+  background: var(--color-success-subtle);
+  color: var(--color-success-text);
 }
 
 .pill-muted {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(236, 240, 241, 0.65);
+}
+
+.pill-danger {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger-text);
+}
+
+.pill-warning {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning-text);
+}
+
+/* Colores descriptivos por rol */
+.pill-role-admin {
+  background: rgba(var(--brand-accent-rgb), 0.18);
+  color: #c9a9ff;
+}
+
+.pill-role-manager {
+  background: var(--color-warning-subtle);
+  color: var(--color-warning-text);
+}
+
+.pill-role-rp {
+  background: rgba(var(--brand-primary-rgb), 0.18);
+  color: #7fcbff;
 }
 
 .highlight-card {
@@ -335,9 +361,9 @@
   margin: 0;
   padding: 12px 14px;
   border-radius: 16px;
-  background: rgba(231, 76, 60, 0.14);
-  border: 1px solid rgba(231, 76, 60, 0.35);
-  color: #ff8b8b;
+  background: var(--color-danger-subtle);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
 }
 
 .leaderboard-wrap {
@@ -785,8 +811,8 @@
 }
 
 .event-price-input:focus {
-  border-color: rgba(52, 152, 219, 0.9);
-  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.14);
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 4px var(--brand-primary-subtle);
 }
 
 .tickets-browser-grid {
@@ -1135,6 +1161,146 @@
     width: 24px;
     height: 24px;
     font-size: 11px;
+  }
+}
+
+/* ===== ESTADOS DE INTERACCIÓN (capa aditiva) ===== */
+
+/* Transiciones estandarizadas (mismo feel, escala consistente) */
+.primary-button,
+.ghost-button,
+.selector-card {
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal),
+    background var(--transition-normal), filter var(--transition-normal);
+}
+
+.tab-btn {
+  transition: background var(--transition-normal), color var(--transition-normal),
+    transform var(--transition-fast), box-shadow var(--transition-normal);
+}
+
+/* active — presionado: shade + scale(0.98) */
+.primary-button:active,
+.ghost-button:active,
+.tab-btn:active,
+.event-action-btn:active,
+.stat-card-clickable:active {
+  transform: translateY(0) scale(0.98);
+  filter: brightness(0.94);
+}
+
+/* focus-visible — navegación por teclado (los inputs ya lo tenían; faltaba en botones) */
+.primary-button:focus-visible,
+.ghost-button:focus-visible,
+.tab-btn:focus-visible,
+.selector-card:focus-visible,
+.event-action-btn:focus-visible,
+.ticket-download-button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* disabled / procesando — no disponible */
+.primary-button:disabled,
+.ghost-button:disabled,
+.event-action-btn:disabled,
+.primary-button[aria-busy="true"],
+.ghost-button[aria-busy="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.primary-button:disabled:hover,
+.ghost-button:disabled:hover,
+.event-action-btn:disabled:hover {
+  transform: none;
+}
+
+/* Badge de estado con forma, no solo color (accesible para daltonismo) */
+.pill-status {
+  gap: 6px;
+}
+
+.pill-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  border: 1.5px solid currentColor;
+  background: transparent;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.pill-status.is-active::before {
+  background: currentColor;
+}
+
+/* ===== Card de lista con acciones (equipo, eventos, fases) ===== */
+.list-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px 14px;
+}
+
+.list-card-info {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.list-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.list-card-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.list-card-actions .ghost-button,
+.list-card-actions .primary-button {
+  min-height: 36px;
+  padding: 8px 14px;
+}
+
+/* Acción destructiva: color descriptivo solo al interactuar */
+.ghost-danger:hover {
+  background: var(--color-danger-subtle);
+  color: var(--color-danger-text);
+}
+
+.ghost-danger:focus-visible {
+  outline-color: var(--color-danger);
+}
+
+@media (max-width: 680px) {
+  .list-card {
+    grid-template-columns: 1fr;
+  }
+
+  .list-card-badges {
+    justify-content: flex-start;
+  }
+
+  .list-card-actions .ghost-button,
+  .list-card-actions .primary-button {
+    flex: 1 1 auto;
+    justify-content: center;
+    text-align: center;
   }
 }
 

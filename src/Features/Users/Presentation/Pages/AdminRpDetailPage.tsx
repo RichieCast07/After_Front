@@ -193,7 +193,7 @@ export default function AdminRpDetailPage() {
                 <small>{ticket.fecha_venta ? formatDateTime(ticket.fecha_venta) : "Sin fecha"}</small>
               </div>
               <div className="collection-actions">
-                <span className={`pill ${ticket.estado === "USADO" ? "pill-success" : "pill-muted"}`}>{ticket.estado}</span>
+                <span className={`pill pill-status ${ticket.estado === "USADO" ? "pill-success is-active" : "pill-muted"}`}>{ticket.estado}</span>
                 <span className="pill pill-success">${Number(ticket.precio).toFixed(2)}</span>
               </div>
             </article>

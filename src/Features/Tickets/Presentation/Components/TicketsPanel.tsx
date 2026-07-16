@@ -51,7 +51,7 @@ function renderTicketCard(ticket: TicketDTO) {
         {ticket.cliente_telefono ? <small>{ticket.cliente_telefono}</small> : null}
         <small>${ticket.precio.toFixed(2)}</small>
       </div>
-      <span className={`pill ${ticket.estado === "ACTIVO" ? "pill-success" : "pill-muted"}`}>{ticket.estado}</span>
+      <span className={`pill pill-status ${ticket.estado === "ACTIVO" ? "pill-success is-active" : "pill-muted"}`}>{ticket.estado}</span>
     </article>
   );
 }

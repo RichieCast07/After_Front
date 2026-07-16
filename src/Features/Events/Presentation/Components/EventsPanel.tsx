@@ -72,9 +72,9 @@ export default function EventsPanel({
           {events.map((item) => (
             <article
               key={item.id}
-              className={`collection-card event-card ${selectedEventId === item.id ? "collection-card-active" : ""}`}
+              className={`collection-card event-card list-card ${selectedEventId === item.id ? "collection-card-active" : ""}`}
             >
-              <div className="event-card-main">
+              <div className="list-card-info event-card-main">
                 <h3>{item.nombre}</h3>
                 <p>{formatDate(item.fecha_evento)}</p>
                 <div className="event-meta-row">
@@ -92,10 +92,12 @@ export default function EventsPanel({
                   <small className="event-code">Código: {item.codigo_evento}</small>
                 </div>
               </div>
-              <div className="collection-actions event-actions">
-                <span className={`pill ${item.activo ? "pill-success" : "pill-muted"}`}>
+              <div className="list-card-badges">
+                <span className={`pill pill-status ${item.activo ? "pill-success is-active" : "pill-muted"}`}>
                   {item.activo ? "Activo" : "Inactivo"}
                 </span>
+              </div>
+              <div className="list-card-actions">
                 <button
                   type="button"
                   className="ghost-button event-action-btn"
