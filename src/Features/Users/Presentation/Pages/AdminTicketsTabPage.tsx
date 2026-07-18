@@ -20,6 +20,8 @@ export default function AdminTicketsTabPage() {
   const [selectedTicketForQr, setSelectedTicketForQr] = useState<TicketDTO | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const load = async () => {
       if (!selectedEventId) {
         setTickets([]);
@@ -29,17 +31,23 @@ export default function AdminTicketsTabPage() {
       setLoading(true);
       try {
         const data = await ticketsUseCase.getTicketsByEventId(selectedEventId);
+        if (cancelled) return;
         setTickets(data);
         setError("");
       } catch (loadError) {
+        if (cancelled) return;
         setError(loadError instanceof Error ? loadError.message : "No fue posible cargar los boletos.");
         setTickets([]);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     void load();
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedEventId]);
 
   const activeTickets = useMemo(() => tickets.filter((ticket) => ticket.estado === "ACTIVO"), [tickets]);
