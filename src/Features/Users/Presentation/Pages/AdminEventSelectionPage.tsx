@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EventsPanel from "../../../Events/Presentation/Components/EventsPanel";
+import type { useEventsViewModel } from "../../../Events/Presentation/ViewModels/useEventsViewModel";
 import FormModal from "../../../Shared/Presentation/Components/FormModal";
-import { useAdminLayoutContext } from "./AdminLayoutPage";
 
-export default function AdminEventsTabPage() {
+interface AdminEventSelectionPageProps {
+  eventsVm: ReturnType<typeof useEventsViewModel>;
+  onEnter: (eventId: number) => void;
+}
+
+export default function AdminEventSelectionPage({ eventsVm, onEnter }: AdminEventSelectionPageProps) {
   const navigate = useNavigate();
-  const { eventsVm } = useAdminLayoutContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const openCreateModal = () => {
@@ -43,12 +47,14 @@ export default function AdminEventsTabPage() {
         onEdit={(event) => openEditModal(event.id)}
         onToggle={(id) => void eventsVm.toggleStatus(id)}
         onViewDetails={(id) => navigate(`/dashboard/events/${id}`)}
+        onEnter={onEnter}
       />
 
       {isModalOpen ? (
         <FormModal
           title={eventsVm.editingId ? "Actualizar evento" : "Crear evento"}
           subtitle="Editor"
+          error={eventsVm.error}
           onClose={() => setIsModalOpen(false)}
         >
           <div className="field-grid">

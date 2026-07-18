@@ -2,8 +2,6 @@ import type { ClientDTO } from "../../Data/Models/Client";
 
 interface ClientsPanelProps {
   clients: ClientDTO[];
-  selectedClientId: number | null;
-  setSelectedClientId: (clientId: number) => void;
   searchPhone: string;
   setSearchPhone: (value: string) => void;
   searchResult: ClientDTO | null;
@@ -11,14 +9,13 @@ interface ClientsPanelProps {
   downloading: boolean;
   error: string;
   onCreateClick?: () => void;
+  onEdit?: (client: ClientDTO) => void;
   onSearch: () => void;
   onDownloadCsv: () => void;
 }
 
 export default function ClientsPanel({
   clients,
-  selectedClientId,
-  setSelectedClientId,
   searchPhone,
   setSearchPhone,
   searchResult,
@@ -26,6 +23,7 @@ export default function ClientsPanel({
   downloading,
   error,
   onCreateClick,
+  onEdit,
   onSearch,
   onDownloadCsv,
 }: ClientsPanelProps) {
@@ -34,7 +32,7 @@ export default function ClientsPanel({
       <div>
         <div className="panel-heading">
           <div>
-            <span className="eyebrow">Clients</span>
+            <span className="eyebrow">Clientes</span>
             <h2>Base de clientes</h2>
           </div>
           <span className="status-chip">{clients.length} registrados</span>
@@ -42,7 +40,7 @@ export default function ClientsPanel({
 
         <div className="inline-search">
           <input
-            placeholder="Buscar por telefono"
+            placeholder="Buscar por teléfono"
             value={searchPhone}
             onChange={(event) => setSearchPhone(event.target.value)}
           />
@@ -71,16 +69,23 @@ export default function ClientsPanel({
 
         <div className="collection-list compact-list">
           {clients.map((client) => (
-            <button
-              key={client.id}
-              type="button"
-              className={`selector-card ${selectedClientId === client.id ? "selector-card-active" : ""}`}
-              onClick={() => setSelectedClientId(client.id)}
-            >
-              <strong>{client.nombre_completo}</strong>
-              <span>{client.telefono}</span>
-            </button>
+            <article key={client.id} className="collection-card list-card">
+              <div className="list-card-info">
+                <h3>{client.nombre_completo}</h3>
+                <p>{client.telefono}</p>
+              </div>
+              {onEdit ? (
+                <div className="list-card-actions">
+                  <button type="button" className="ghost-button" onClick={() => onEdit(client)}>
+                    Editar
+                  </button>
+                </div>
+              ) : null}
+            </article>
           ))}
+          {clients.length === 0 && !loading ? (
+            <p className="muted-copy">Aún no hay clientes registrados.</p>
+          ) : null}
         </div>
       </div>
     </section>

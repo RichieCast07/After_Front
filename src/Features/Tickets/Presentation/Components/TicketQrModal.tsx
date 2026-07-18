@@ -1,6 +1,7 @@
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 import { useEffect, useRef, useState } from "react";
+import { formatCurrency } from "../../../../Core/Utils/currency";
 import { formatDateTime } from "../../../../Core/Utils/date";
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import type { TicketDTO } from "../../Data/Models/Ticket";
@@ -182,7 +183,7 @@ export default function TicketQrModal({ ticket, eventName, eventLocation, onClos
             </div>
             <div className="qr-ticket-chip">
               <small>Precio</small>
-              <strong>${Number(ticket.precio).toFixed(2)}</strong>
+              <strong>{formatCurrency(ticket.precio)}</strong>
             </div>
             <div className="qr-ticket-chip">
               <small>Código evento</small>

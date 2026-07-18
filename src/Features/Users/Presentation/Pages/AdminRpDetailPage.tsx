@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import UserContext from "../../../../Core/Context/UserContext";
+import { formatCurrency } from "../../../../Core/Utils/currency";
 import { formatDateTime } from "../../../../Core/Utils/date";
 import DashboardShell from "../../../Shared/Presentation/Components/DashboardShell";
 import type { TicketDTO } from "../../../Tickets/Data/Models/Ticket";
@@ -132,11 +133,11 @@ export default function AdminRpDetailPage() {
           </article>
           <article className="stat-card">
             <span>Ingresos generados</span>
-            <strong>${totals.ingresos.toFixed(2)}</strong>
+            <strong>{formatCurrency(totals.ingresos)}</strong>
           </article>
           <article className="stat-card">
             <span>Comisión total</span>
-            <strong>${totals.comision.toFixed(2)}</strong>
+            <strong>{formatCurrency(totals.comision)}</strong>
           </article>
         </div>
 
@@ -151,7 +152,7 @@ export default function AdminRpDetailPage() {
                   </div>
                   <div className="collection-actions metrics-compact-actions">
                     <span className="pill">{phase.boletos} boletos</span>
-                    <span className="pill pill-success">${phase.ingresos.toFixed(2)}</span>
+                    <span className="pill pill-success">{formatCurrency(phase.ingresos)}</span>
                   </div>
                 </article>
               ))}
@@ -194,7 +195,7 @@ export default function AdminRpDetailPage() {
               </div>
               <div className="collection-actions">
                 <span className={`pill pill-status ${ticket.estado === "USADO" ? "pill-success is-active" : "pill-muted"}`}>{ticket.estado}</span>
-                <span className="pill pill-success">${Number(ticket.precio).toFixed(2)}</span>
+                <span className="pill pill-success">{formatCurrency(ticket.precio)}</span>
               </div>
             </article>
           ))}

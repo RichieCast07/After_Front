@@ -3,11 +3,12 @@ import type { ReactNode } from "react";
 interface FormModalProps {
   title: string;
   subtitle?: string;
+  error?: string;
   onClose: () => void;
   children: ReactNode;
 }
 
-export default function FormModal({ title, subtitle, onClose, children }: FormModalProps) {
+export default function FormModal({ title, subtitle, error, onClose, children }: FormModalProps) {
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="form-modal-title">
       <section className="modal-card">
@@ -20,6 +21,8 @@ export default function FormModal({ title, subtitle, onClose, children }: FormMo
             Cerrar
           </button>
         </div>
+
+        {error ? <p className="inline-error" role="alert">{error}</p> : null}
 
         {children}
       </section>

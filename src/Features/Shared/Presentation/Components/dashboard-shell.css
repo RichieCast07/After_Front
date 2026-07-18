@@ -157,6 +157,7 @@
 .select-frame {
   display: grid;
   gap: 6px;
+  min-width: 0;
 }
 
 .field-grid span,
@@ -170,9 +171,10 @@
 .inline-search input,
 .select-frame select {
   width: 100%;
+  min-width: 0;
   border: 1px solid rgba(189, 195, 199, 0.22);
   background: rgba(7, 17, 31, 0.55);
-  color: #ecf0f1;
+  color: var(--text-primary);
   border-radius: 12px;
   padding: 10px 12px;
   outline: none;
@@ -209,7 +211,7 @@
 }
 
 .primary-button {
-  background: linear-gradient(45deg, #3498db, #2c3e50);
+  background: linear-gradient(45deg, var(--brand-primary), var(--brand-secondary));
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
 }
 
@@ -336,7 +338,7 @@
 
 .stat-card-clickable {
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .stat-card-clickable:hover {
@@ -366,12 +368,14 @@
   color: var(--color-danger-text);
 }
 
-.leaderboard-wrap {
+.leaderboard-wrap,
+.phase-breakdown {
   display: grid;
   gap: 10px;
 }
 
-.leaderboard-wrap h3 {
+.leaderboard-wrap h3,
+.phase-breakdown h3 {
   margin: 0;
 }
 
@@ -402,7 +406,7 @@
 .leaderboard-bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #3498db, #8d44ff);
+  background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
 }
 
 .manager-grid {
@@ -498,6 +502,7 @@
   border-radius: 24px;
   box-shadow: 0 16px 32px rgba(0, 0, 0, 0.24);
   width: 100%;
+  aspect-ratio: 1;
   display: grid;
   place-items: center;
 }
@@ -621,7 +626,7 @@
 
 .rp-compact-main p {
   margin: 2px 0 0;
-  font-size: 0.79rem;
+  font-size: 0.78rem;
   line-height: 1.2;
 }
 
@@ -673,7 +678,7 @@
 
 .metrics-compact-main h3 {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   line-height: 1.2;
 }
 
@@ -689,7 +694,7 @@
 
 .metrics-compact-actions .ghost-button {
   padding: 6px 10px;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 12px;
 }
 
@@ -804,8 +809,8 @@
   width: 118px;
   border: 1px solid rgba(189, 195, 199, 0.22);
   background: rgba(7, 17, 31, 0.55);
-  color: #ecf0f1;
-  border-radius: 10px;
+  color: var(--text-primary);
+  border-radius: 12px;
   padding: 8px 10px;
   outline: none;
 }
@@ -853,7 +858,7 @@
 }
 
 .ticket-list-item strong {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
 }
 
 .ticket-list-item span {
@@ -915,10 +920,10 @@
 }
 
 .tab-btn-active {
-  background: linear-gradient(45deg, rgba(52, 152, 219, 0.35), rgba(44, 62, 80, 0.5));
-  border-color: rgba(52, 152, 219, 0.65);
-  color: #ecf0f1;
-  box-shadow: 0 4px 16px rgba(52, 152, 219, 0.25);
+  background: linear-gradient(45deg, rgba(var(--brand-primary-rgb), 0.35), rgba(var(--brand-secondary-rgb), 0.5));
+  border-color: rgba(var(--brand-primary-rgb), 0.65);
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(var(--brand-primary-rgb), 0.25);
 }
 
 .tab-icon {

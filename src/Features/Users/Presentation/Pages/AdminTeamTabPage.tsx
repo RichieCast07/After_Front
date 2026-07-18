@@ -41,9 +41,13 @@ export default function AdminTeamTabPage() {
         selectedRole={teamVm.selectedRole}
         setSelectedRole={teamVm.setSelectedRole}
         loading={teamVm.loading}
+        busy={teamVm.saving}
         error={teamVm.error}
         currentUserId={userContext?.user?.user_id}
-        onCreateClick={() => setIsModalOpen(true)}
+        onCreateClick={() => {
+          teamVm.resetForm();
+          setIsModalOpen(true);
+        }}
         onEdit={handleEdit}
         onDelete={(user) => void handleDelete(user)}
         onToggleActive={(user) => void teamVm.toggleActive(user)}
@@ -53,6 +57,7 @@ export default function AdminTeamTabPage() {
         <FormModal
           title={teamVm.editingId ? "Editar usuario" : "Crear usuario operativo"}
           subtitle="Equipo"
+          error={teamVm.error}
           onClose={handleClose}
         >
           <div className="field-grid">

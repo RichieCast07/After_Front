@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatCurrency } from "../../../../Core/Utils/currency";
 import { formatDateOnly, formatDateTime, formatTimeOnly } from "../../../../Core/Utils/date";
 import { clientsUseCase } from "../../../Clients/Domain/ClientsUseCase";
 import MetricsPanel from "../../../Metrics/Presentation/Components/MetricsPanel";
@@ -170,7 +171,7 @@ export default function AdminMetricsTabPage() {
                       <span>{ticket.cliente_nombre ?? `Cliente #${ticket.cliente_id}`}</span>
                       <span>{ticket.rp_nombre ?? `RP #${ticket.rp_id}`}</span>
                     </div>
-                    <span className="pill pill-success">${Number(ticket.precio).toFixed(2)}</span>
+                    <span className="pill pill-success">{formatCurrency(ticket.precio)}</span>
                   </button>
                 ))}
                 {soldTickets.length === 0 ? <p className="muted-copy">No hay boletos vendidos para este evento.</p> : null}
@@ -197,30 +198,30 @@ export default function AdminMetricsTabPage() {
             </div>
 
             {editingClient ? (
-              <div className="edit-client-form">
-                <div className="form-field">
-                  <label htmlFor="edit-nombre">Nombre</label>
-                  <input
-                    id="edit-nombre"
-                    value={editClientForm.nombre_completo}
-                    onChange={(e) => setEditClientForm((f) => ({ ...f, nombre_completo: e.target.value }))}
-                    disabled={editClientSaving}
-                  />
-                </div>
-                <div className="form-field">
-                  <label htmlFor="edit-telefono">Teléfono</label>
-                  <input
-                    id="edit-telefono"
-                    value={editClientForm.telefono}
-                    onChange={(e) => setEditClientForm((f) => ({ ...f, telefono: e.target.value }))}
-                    disabled={editClientSaving}
-                  />
+              <div className="form-stack">
+                <div className="field-grid">
+                  <label>
+                    <span>Nombre</span>
+                    <input
+                      value={editClientForm.nombre_completo}
+                      onChange={(e) => setEditClientForm((f) => ({ ...f, nombre_completo: e.target.value }))}
+                      disabled={editClientSaving}
+                    />
+                  </label>
+                  <label>
+                    <span>Teléfono</span>
+                    <input
+                      value={editClientForm.telefono}
+                      onChange={(e) => setEditClientForm((f) => ({ ...f, telefono: e.target.value }))}
+                      disabled={editClientSaving}
+                    />
+                  </label>
                 </div>
                 {editClientError ? <p className="inline-error">{editClientError}</p> : null}
-                <div className="form-actions">
+                <div className="action-row">
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="primary-button"
                     onClick={() => void saveEditClient()}
                     disabled={editClientSaving}
                   >
@@ -228,7 +229,7 @@ export default function AdminMetricsTabPage() {
                   </button>
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="ghost-button"
                     onClick={() => setEditingClient(false)}
                     disabled={editClientSaving}
                   >
@@ -237,7 +238,7 @@ export default function AdminMetricsTabPage() {
                 </div>
               </div>
             ) : (
-              <button type="button" className="btn btn-secondary" onClick={openEditClient}>
+              <button type="button" className="ghost-button" onClick={openEditClient}>
                 Editar cliente
               </button>
             )}
@@ -257,11 +258,11 @@ export default function AdminMetricsTabPage() {
               </article>
               <article className="detail-card">
                 <small>Precio</small>
-                <p>${Number(detailTicket.precio).toFixed(2)}</p>
+                <p>{formatCurrency(detailTicket.precio)}</p>
               </article>
               <article className="detail-card">
                 <small>Comisión RP</small>
-                <p>${Number(detailTicket.comision_rp ?? 0).toFixed(2)}</p>
+                <p>{formatCurrency(detailTicket.comision_rp ?? 0)}</p>
               </article>
               <article className="detail-card">
                 <small>Tipo de boleto</small>

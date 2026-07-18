@@ -5,6 +5,7 @@ interface TeamPanelProps {
   selectedRole: number;
   setSelectedRole: (roleId: number) => void;
   loading: boolean;
+  busy?: boolean;
   error: string;
   currentUserId?: number;
   onCreateClick?: () => void;
@@ -32,6 +33,7 @@ export default function TeamPanel({
   selectedRole,
   setSelectedRole,
   loading,
+  busy = false,
   error,
   currentUserId,
   onCreateClick,
@@ -92,17 +94,17 @@ export default function TeamPanel({
               {onEdit || (onToggleActive && user.id !== currentUserId) || (onDelete && user.id !== currentUserId) ? (
                 <div className="list-card-actions">
                   {onEdit ? (
-                    <button type="button" className="ghost-button" onClick={() => onEdit(user)}>
+                    <button type="button" className="ghost-button" disabled={busy} onClick={() => onEdit(user)}>
                       Editar
                     </button>
                   ) : null}
                   {onToggleActive && user.id !== currentUserId ? (
-                    <button type="button" className="ghost-button" onClick={() => onToggleActive(user)}>
+                    <button type="button" className="ghost-button" disabled={busy} onClick={() => onToggleActive(user)}>
                       {user.activo ? "Desactivar" : "Activar"}
                     </button>
                   ) : null}
                   {onDelete && user.id !== currentUserId ? (
-                    <button type="button" className="ghost-button ghost-danger" onClick={() => onDelete(user)}>
+                    <button type="button" className="ghost-button ghost-danger" disabled={busy} onClick={() => onDelete(user)}>
                       Eliminar
                     </button>
                   ) : null}
@@ -110,6 +112,9 @@ export default function TeamPanel({
               ) : null}
             </article>
           ))}
+          {users.length === 0 && !loading ? (
+            <p className="muted-copy">No hay usuarios para este filtro.</p>
+          ) : null}
         </div>
       </div>
     </section>

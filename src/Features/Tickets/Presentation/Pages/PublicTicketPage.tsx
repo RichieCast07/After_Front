@@ -2,6 +2,7 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import "../../../Shared/Presentation/Components/dashboard-shell.css";
+import { formatCurrency } from "../../../../Core/Utils/currency";
 import { formatDateTime } from "../../../../Core/Utils/date";
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import type { TicketDTO } from "../../Data/Models/Ticket";
@@ -155,7 +156,7 @@ export default function PublicTicketPage() {
               </div>
               <div className="qr-ticket-chip">
                 <small>Precio</small>
-                <strong>${Number(ticket.precio).toFixed(2)}</strong>
+                <strong>{formatCurrency(ticket.precio)}</strong>
               </div>
               <div className="qr-ticket-chip">
                 <small>Código evento</small>

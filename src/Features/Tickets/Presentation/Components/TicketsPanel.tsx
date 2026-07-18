@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../../Core/Utils/currency";
 import type { EventDTO } from "../../../Events/Data/Models/Event";
 import type { PhaseDTO } from "../../../Phases/Data/Models/Phase";
 import type { TicketDTO } from "../../Data/Models/Ticket";
@@ -49,7 +50,7 @@ function renderTicketCard(ticket: TicketDTO) {
           {ticket.cliente_nombre ?? `Cliente #${ticket.cliente_id}`} • Fase #{ticket.fase_id}
         </p>
         {ticket.cliente_telefono ? <small>{ticket.cliente_telefono}</small> : null}
-        <small>${ticket.precio.toFixed(2)}</small>
+        <small>{formatCurrency(ticket.precio)}</small>
       </div>
       <span className={`pill pill-status ${ticket.estado === "ACTIVO" ? "pill-success is-active" : "pill-muted"}`}>{ticket.estado}</span>
     </article>
@@ -87,8 +88,8 @@ export default function TicketsPanel({
       <div className="form-stack">
         <div className="panel-heading">
           <div>
-            <span className="eyebrow">Tickets</span>
-            <h2>Venta y validacion</h2>
+            <span className="eyebrow">Boletos</span>
+            <h2>Venta y validación</h2>
           </div>
           <span className="status-chip">Evento #{selectedEventId ?? "-"}</span>
         </div>
@@ -113,7 +114,7 @@ export default function TicketsPanel({
             <input value={form.cliente_nombre} onChange={(event) => onChange("cliente_nombre", event.target.value)} />
           </label>
           <label>
-            <span>Telefono del cliente</span>
+            <span>Teléfono del cliente</span>
             <input value={form.cliente_telefono} onChange={(event) => onChange("cliente_telefono", event.target.value)} />
           </label>
           <label>
@@ -131,11 +132,11 @@ export default function TicketsPanel({
           </label>
           <label>
             <span>Precio automático</span>
-            <input value={activePhasePrice !== null ? `$${activePhasePrice.toFixed(2)}` : "-"} disabled />
+            <input value={activePhasePrice !== null ? formatCurrency(activePhasePrice) : "-"} disabled />
           </label>
           <label>
-            <span>Comision RP (10%)</span>
-            <input value={rpCommission !== null ? `$${rpCommission.toFixed(2)}` : "-"} disabled />
+            <span>Comisión RP (10%)</span>
+            <input value={rpCommission !== null ? formatCurrency(rpCommission) : "-"} disabled />
           </label>
         </div>
 
@@ -152,7 +153,7 @@ export default function TicketsPanel({
 
         <div className="inline-search">
           <input
-            placeholder="Buscar ticket por codigo"
+            placeholder="Buscar boleto por código"
             value={lookupCode}
             onChange={(event) => setLookupCode(event.target.value)}
           />
@@ -186,7 +187,7 @@ export default function TicketsPanel({
       <div>
         <div className="panel-heading">
           <div>
-            <span className="eyebrow">Monitoring</span>
+            <span className="eyebrow">Monitoreo</span>
             <h2>{mode === "admin" ? "Boletos del evento" : "Tus ventas"}</h2>
           </div>
           <span className="status-chip">{mode === "admin" ? eventTickets.length : rpTickets.length} registros</span>
@@ -194,6 +195,9 @@ export default function TicketsPanel({
 
         <div className="collection-list compact-list">
           {(mode === "admin" ? eventTickets : rpTickets).map(renderTicketCard)}
+          {(mode === "admin" ? eventTickets : rpTickets).length === 0 && !loading ? (
+            <p className="muted-copy">Aún no hay boletos registrados.</p>
+          ) : null}
         </div>
 
         {mode === "admin" ? (
@@ -207,6 +211,9 @@ export default function TicketsPanel({
             </div>
             <div className="collection-list compact-list">
               {noShowTickets.map(renderTicketCard)}
+              {noShowTickets.length === 0 && !loading ? (
+                <p className="muted-copy">Todos los clientes han escaneado su boleto.</p>
+              ) : null}
             </div>
           </>
         ) : null}

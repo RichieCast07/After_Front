@@ -1,3 +1,4 @@
+import { formatCurrency } from "../../../../Core/Utils/currency";
 import type {
     EventMetricDTO,
     EventPhaseMetricDTO,
@@ -19,14 +20,6 @@ interface MetricsPanelProps {
   onRefresh?: () => void;
 }
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("es-MX", {
-    style: "currency",
-    currency: "MXN",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
 export default function MetricsPanel({
   summary,
   rpMetrics,
@@ -41,6 +34,13 @@ export default function MetricsPanel({
   onRefresh,
 }: MetricsPanelProps) {
   const personalMetric = currentUserId ? rpMetrics.find((metric) => metric.rp_id === currentUserId) : null;
+
+  const vendidos = summary?.total_boletos_vendidos ?? 0;
+  const ingresos = summary?.total_ingresos ?? 0;
+  const comisiones = summary?.total_comisiones_rp ?? 0;
+  const ingresoNeto = ingresos - comisiones;
+  const ticketPromedio = vendidos > 0 ? ingresos / vendidos : 0;
+  const rpsConVentas = rpMetrics.filter((metric) => metric.boletos_vendidos > 0).length;
 
   return (
     <section className="glass-panel metrics-panel">
@@ -78,21 +78,31 @@ export default function MetricsPanel({
             }}
           >
             <span>Boletos vendidos</span>
-            <strong>{summary.total_boletos_vendidos}</strong>
+            <strong>{vendidos}</strong>
             {onOpenSoldTickets ? <small>Ver lista</small> : null}
           </article>
           <article className="stat-card">
             <span>Ingresos</span>
-            <strong>{formatCurrency(summary.total_ingresos)}</strong>
+            <strong>{formatCurrency(ingresos)}</strong>
           </article>
           <article className="stat-card">
-            <span>Comisiones</span>
-            <strong>{formatCurrency(summary.total_comisiones_rp)}</strong>
+            <span>Comisiones RP</span>
+            <strong>{formatCurrency(comisiones)}</strong>
           </article>
           <article className="stat-card">
-            <span>Boletos activos</span>
-            <strong>{summary.boletos_activos}</strong>
+            <span>Ingreso neto</span>
+            <strong>{formatCurrency(ingresoNeto)}</strong>
           </article>
+          <article className="stat-card">
+            <span>Ticket promedio</span>
+            <strong>{formatCurrency(ticketPromedio)}</strong>
+          </article>
+          {!compact ? (
+            <article className="stat-card">
+              <span>RPs con ventas</span>
+              <strong>{rpsConVentas}</strong>
+            </article>
+          ) : null}
         </div>
       ) : null}
 

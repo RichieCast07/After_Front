@@ -24,6 +24,7 @@ export default function AdminPhasesTabPage() {
         eventName={selectedEvent?.nombre}
         phases={phasesVm.phases}
         loading={phasesVm.loading}
+        saving={phasesVm.saving}
         error={phasesVm.error}
         onCreateClick={() => {
           phasesVm.resetForm();
@@ -40,6 +41,7 @@ export default function AdminPhasesTabPage() {
         <FormModal
           title={phasesVm.editingId ? "Actualizar fase" : "Crear fase"}
           subtitle="Fases"
+          error={phasesVm.error}
           onClose={() => setIsModalOpen(false)}
         >
           <div className="field-grid">

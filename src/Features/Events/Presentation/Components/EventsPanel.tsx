@@ -1,4 +1,5 @@
 import type { EventDTO } from "../../Data/Models/Event";
+import { formatCurrency } from "../../../../Core/Utils/currency";
 import { formatDateTime as formatDate } from "../../../../Core/Utils/date";
 
 interface EventsPanelProps {
@@ -13,6 +14,7 @@ interface EventsPanelProps {
   onEdit: (event: EventDTO) => void;
   onToggle: (id: number) => void;
   onViewDetails?: (id: number) => void;
+  onEnter?: (id: number) => void;
 }
 
 export default function EventsPanel({
@@ -20,19 +22,21 @@ export default function EventsPanel({
   selectedEventId,
   setSelectedEventId,
   loading,
+  saving,
   error,
   readOnly = false,
   onCreateClick,
   onEdit,
   onToggle,
   onViewDetails,
+  onEnter,
 }: EventsPanelProps) {
   return (
     <section className="glass-panel panel-grid">
       <div>
         <div className="panel-heading">
           <div>
-            <span className="eyebrow">Events</span>
+            <span className="eyebrow">Eventos</span>
             <h2>Agenda operativa</h2>
           </div>
           <span className="status-chip">{events.length} eventos</span>
@@ -40,30 +44,32 @@ export default function EventsPanel({
 
         {!readOnly && onCreateClick ? (
           <div className="action-row" style={{ marginBottom: "10px" }}>
-            <button type="button" className="primary-button" onClick={onCreateClick}>
+            <button type="button" className="primary-button" disabled={saving} onClick={onCreateClick}>
               Crear evento
             </button>
           </div>
         ) : null}
 
-        <div className="select-frame">
-          <label htmlFor="event-scope">Evento activo</label>
-          <select
-            id="event-scope"
-            value={selectedEventId ?? ""}
-            onChange={(event) => setSelectedEventId(Number(event.target.value))}
-            disabled={!events.length}
-          >
-            <option value="" disabled>
-              Selecciona un evento
-            </option>
-            {events.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.nombre}
+        {!onEnter ? (
+          <div className="select-frame">
+            <label htmlFor="event-scope">Evento activo</label>
+            <select
+              id="event-scope"
+              value={selectedEventId ?? ""}
+              onChange={(event) => setSelectedEventId(Number(event.target.value))}
+              disabled={!events.length}
+            >
+              <option value="" disabled>
+                Selecciona un evento
               </option>
-            ))}
-          </select>
-        </div>
+              {events.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
 
         {loading ? <p className="muted-copy">Cargando eventos...</p> : null}
         {error ? <p className="inline-error">{error}</p> : null}
@@ -87,7 +93,7 @@ export default function EventsPanel({
                 </div>
                 <div className="event-meta-row">
                   <small>
-                    Precio inicial: {item.precio_inicial != null ? `$${Number(item.precio_inicial).toFixed(2)}` : "No definido"}
+                    Precio inicial: {item.precio_inicial != null ? formatCurrency(item.precio_inicial) : "No definido"}
                   </small>
                   <small className="event-code">Código: {item.codigo_evento}</small>
                 </div>
@@ -98,6 +104,15 @@ export default function EventsPanel({
                 </span>
               </div>
               <div className="list-card-actions">
+                {onEnter ? (
+                  <button
+                    type="button"
+                    className="primary-button event-action-btn"
+                    onClick={() => onEnter(item.id)}
+                  >
+                    Abrir
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   className="ghost-button event-action-btn"
@@ -110,10 +125,10 @@ export default function EventsPanel({
                 </button>
                 {!readOnly ? (
                   <>
-                    <button type="button" className="ghost-button event-action-btn" onClick={() => onEdit(item)}>
+                    <button type="button" className="ghost-button event-action-btn" disabled={saving} onClick={() => onEdit(item)}>
                       Editar
                     </button>
-                    <button type="button" className="ghost-button event-action-btn" onClick={() => onToggle(item.id)}>
+                    <button type="button" className="ghost-button event-action-btn" disabled={saving} onClick={() => onToggle(item.id)}>
                       {item.activo ? "Desactivar" : "Activar"}
                     </button>
                   </>
@@ -121,6 +136,9 @@ export default function EventsPanel({
               </div>
             </article>
           ))}
+          {events.length === 0 && !loading ? (
+            <p className="muted-copy">No hay eventos todavía.</p>
+          ) : null}
         </div>
       </div>
     </section>

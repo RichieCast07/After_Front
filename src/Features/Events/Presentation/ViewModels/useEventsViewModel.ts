@@ -80,6 +80,7 @@ export function useEventsViewModel() {
   };
 
   const handleEdit = (event: EventDTO) => {
+    setError("");
     setEditingId(event.id);
     setForm({
       nombre: event.nombre,
@@ -94,6 +95,7 @@ export function useEventsViewModel() {
   const resetForm = () => {
     setEditingId(null);
     setForm(initialForm);
+    setError("");
   };
 
   const submit = async () => {
