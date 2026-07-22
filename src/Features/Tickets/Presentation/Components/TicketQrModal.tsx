@@ -1,8 +1,8 @@
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 import { useEffect, useRef, useState } from "react";
-import { formatCurrency } from "../../../../Core/Utils/currency";
-import { formatDateTime } from "../../../../Core/Utils/date";
+import afterLogo from "../../../../assets/after.jpg";
+import { formatDateTime, formatLongDate } from "../../../../Core/Utils/date";
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import type { TicketDTO } from "../../Data/Models/Ticket";
 
@@ -30,12 +30,12 @@ function getQrContent(ticket: TicketDTO) {
   });
 }
 
-export default function TicketQrModal({ ticket, eventName, eventLocation, onClose }: TicketQrModalProps) {
+export default function TicketQrModal({ ticket, eventName, onClose }: TicketQrModalProps) {
   const [qrUrl, setQrUrl] = useState("");
   const [qrError, setQrError] = useState("");
   const [downloadingImage, setDownloadingImage] = useState(false);
   const [downloadError, setDownloadError] = useState("");
-  const [resolvedEventLocation, setResolvedEventLocation] = useState("");
+  const [eventInfo, setEventInfo] = useState<{ nombre: string; fecha: string; lugar: string } | null>(null);
   const ticketCardRef = useRef<HTMLDivElement | null>(null);
 
   const downloadTicketImage = async () => {
@@ -101,36 +101,32 @@ export default function TicketQrModal({ ticket, eventName, eventLocation, onClos
   useEffect(() => {
     let cancelled = false;
 
-    const loadEventLocation = async () => {
-      if (eventLocation?.trim()) {
-        setResolvedEventLocation(eventLocation.trim());
-        return;
-      }
-
+    const loadEvent = async () => {
       try {
         const event = await eventsUseCase.getEventById(ticket.evento_id);
         if (!cancelled) {
-          setResolvedEventLocation(event.lugar?.trim() ?? "");
+          setEventInfo({ nombre: event.nombre, fecha: event.fecha_evento, lugar: event.lugar ?? "" });
         }
       } catch {
         if (!cancelled) {
-          setResolvedEventLocation("");
+          setEventInfo(null);
         }
       }
     };
 
-    void loadEventLocation();
+    void loadEvent();
 
     return () => {
       cancelled = true;
     };
-  }, [ticket.evento_id, eventLocation]);
+  }, [ticket.evento_id]);
 
-  const locationLabel = resolvedEventLocation || "No disponible";
+  const displayEventName = eventName ?? eventInfo?.nombre ?? `Evento #${ticket.evento_id}`;
+  const displayEventDate = eventInfo?.fecha ? formatLongDate(eventInfo.fecha) : "";
 
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="ticket-qr-title">
-      <section className="modal-card">
+      <section className="modal-card ticket-modal-card">
         <div className="panel-heading">
           <div>
             <span className="eyebrow">Boleto generado</span>
@@ -162,52 +158,40 @@ export default function TicketQrModal({ ticket, eventName, eventLocation, onClos
           </div>
         </div>
 
-        <div className="qr-ticket-preview" ref={ticketCardRef}>
-          <div className="qr-code-frame">
-            {qrUrl ? <img src={qrUrl} alt={`QR del boleto ${ticket.codigo}`} /> : null}
-          </div>
+        {qrError ? <p className="inline-error">{qrError}</p> : null}
+        {downloadError ? <p className="inline-error">{downloadError}</p> : null}
 
-          {qrError ? <p className="inline-error">{qrError}</p> : null}
-          {downloadError ? <p className="inline-error">{downloadError}</p> : null}
+        <div className="qr-ticket-preview" ref={ticketCardRef} style={{ backgroundImage: `url(${afterLogo})` }}>
+          <div className="qr-ticket-overlay" />
+          {displayEventDate ? (
+            <div className="qr-ticket-date-vertical" aria-label={displayEventDate}>
+              {displayEventDate.toUpperCase().split("").map((char, index) => (
+                <span key={index} aria-hidden="true" className={char === " " ? "qr-date-space" : undefined}>
+                  {char === " " ? "" : char}
+                </span>
+              ))}
+            </div>
+          ) : null}
 
-          <div className="qr-ticket-meta">
-            <strong>{ticket.cliente_nombre ?? `Cliente #${ticket.cliente_id}`}</strong>
-            <span>{eventName ?? `Evento #${ticket.evento_id}`}</span>
-            <small>{ticket.codigo}</small>
-          </div>
+          <div className="qr-ticket-content">
+            <div className="qr-ticket-header">
+              <strong className="qr-ticket-event-name">{displayEventName}</strong>
+            </div>
 
-          <div className="qr-ticket-grid">
-            <div className="qr-ticket-chip">
-              <small>Teléfono</small>
-              <strong>{ticket.cliente_telefono ?? "No disponible"}</strong>
+            <div className="qr-ticket-qr">
+              <div className="qr-code-frame">
+                {qrUrl ? <img src={qrUrl} alt={`QR del boleto ${ticket.codigo}`} /> : null}
+              </div>
+              <span className="qr-ticket-code">{ticket.codigo}</span>
             </div>
-            <div className="qr-ticket-chip">
-              <small>Precio</small>
-              <strong>{formatCurrency(ticket.precio)}</strong>
-            </div>
-            <div className="qr-ticket-chip">
-              <small>Código evento</small>
-              <strong>{ticket.codigo_evento ?? "Sin código"}</strong>
-            </div>
-            <div className="qr-ticket-chip">
-              <small>Estado</small>
-              <strong>{ticket.estado}</strong>
-            </div>
-            <div className="qr-ticket-chip">
-              <small>Tipo</small>
-              <strong>{ticket.tipo_boleto ?? "GENERAL"}</strong>
-            </div>
-            <div className="qr-ticket-chip">
-              <small>RP</small>
-              <strong>{ticket.rp_nombre ?? `RP #${ticket.rp_id}`}</strong>
-            </div>
-            <div className="qr-ticket-chip">
-              <small>Fecha venta</small>
-              <strong>{ticket.fecha_venta ? formatDateTime(ticket.fecha_venta) : "-"}</strong>
-            </div>
-            <div className="qr-ticket-chip">
-              <small>Ubicación</small>
-              <strong>{locationLabel}</strong>
+
+            <div className="qr-ticket-footer">
+              <strong className="qr-ticket-holder-name">{ticket.cliente_nombre ?? `Cliente #${ticket.cliente_id}`}</strong>
+              {ticket.cliente_telefono ? <span className="qr-ticket-line">Tel: {ticket.cliente_telefono}</span> : null}
+              <span className="qr-ticket-line">Vendió: {ticket.rp_nombre ?? `RP #${ticket.rp_id}`}</span>
+              {eventInfo?.lugar ? <span className="qr-ticket-line">{eventInfo.lugar}</span> : null}
+              {ticket.fecha_venta ? <span className="qr-ticket-line">Generado: {formatDateTime(ticket.fecha_venta)}</span> : null}
+              <span className="">AFTER by Experiencias Ambar</span>
             </div>
           </div>
         </div>
