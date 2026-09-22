@@ -27,6 +27,8 @@ export interface EventMetricDTO {
 export interface EventPhaseMetricDTO {
   fase_id: number;
   nombre: string;
+  tipo_id: number;
+  tipo_nombre: string;
   precio: number;
   boletos_vendidos: number;
   ingresos_totales: number;

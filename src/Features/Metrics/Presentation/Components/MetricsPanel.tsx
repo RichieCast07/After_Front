@@ -115,7 +115,10 @@ export default function MetricsPanel({
           <article className="detail-card">
             <h3>Comisiones del evento</h3>
             <p>{formatCurrency(eventMetrics.comisiones_rp)}</p>
-            <small>Basado en el evento seleccionado • {phaseMetrics.length} fases analizadas</small>
+            <small>
+              Basado en el evento seleccionado •{" "}
+              {new Set(phaseMetrics.map((phase) => phase.fase_id)).size} fases, {phaseMetrics.length} tipos de boleto analizados
+            </small>
           </article>
         </div>
       ) : null}
@@ -125,9 +128,9 @@ export default function MetricsPanel({
           <h3>Boletos por fase</h3>
           <div className="collection-list compact-list">
             {phaseMetrics.map((phase) => (
-              <article key={phase.fase_id} className="collection-card compact-ticket-card rp-compact-card">
+              <article key={`${phase.fase_id}-${phase.tipo_id}`} className="collection-card compact-ticket-card rp-compact-card">
                 <div className="rp-compact-main">
-                  <h3>{phase.nombre}</h3>
+                  <h3>{phase.nombre} · {phase.tipo_nombre}</h3>
                   <p>{formatCurrency(phase.precio)} / boleto</p>
                 </div>
                 <div className="collection-actions metrics-compact-actions">
