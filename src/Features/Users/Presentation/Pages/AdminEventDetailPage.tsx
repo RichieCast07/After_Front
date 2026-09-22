@@ -163,6 +163,28 @@ export default function AdminEventDetailPage() {
     }
   };
 
+  const toggleTicketTypeActive = async (ticketType: EventTicketTypeDTO) => {
+    const isDeactivating = ticketType.activo;
+    const confirmMessage = isDeactivating
+      ? `¿Eliminar el tipo de boleto "${ticketType.nombre}"? Dejará de ofrecerse para nuevas ventas y de aparecer en precios por fase. Los boletos ya vendidos de este tipo no se ven afectados. Puedes reactivarlo después.`
+      : `¿Reactivar el tipo de boleto "${ticketType.nombre}"?`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await eventsUseCase.updateTicketType(parsedEventId, ticketType.id, { activo: !isDeactivating });
+      await Promise.all([loadEventContext(), loadPhasePrices()]);
+      setError("");
+    } catch (toggleError) {
+      setError(toggleError instanceof Error ? toggleError.message : "No fue posible actualizar el tipo de boleto.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const updatePriceByType = async (ticketTypeId: number) => {
     if (!selectedPhaseId) {
       setError("Selecciona una fase.");
@@ -403,6 +425,16 @@ export default function AdminEventDetailPage() {
                   <div>
                     <h3>{ticketType.nombre}</h3>
                     <small>{ticketType.activo ? "Activo" : "Inactivo"}</small>
+                  </div>
+                  <div className="collection-actions">
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      disabled={saving}
+                      onClick={() => void toggleTicketTypeActive(ticketType)}
+                    >
+                      {ticketType.activo ? "Eliminar" : "Reactivar"}
+                    </button>
                   </div>
                 </article>
               ))}
