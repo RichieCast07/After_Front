@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
     EventMetricDTO,
     EventPhaseMetricDTO,
@@ -15,8 +15,11 @@ export function useMetricsViewModel(eventId: number | null) {
   const [phaseMetrics, setPhaseMetrics] = useState<EventPhaseMetricDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const requestIdRef = useRef(0);
 
   const loadMetrics = async () => {
+    const requestId = ++requestIdRef.current;
+    const isStale = () => requestId !== requestIdRef.current;
     setLoading(true);
     try {
       await metricsUseCase.syncPrices(eventId ?? undefined).catch(() => {});
@@ -24,6 +27,7 @@ export function useMetricsViewModel(eventId: number | null) {
         metricsUseCase.getSummary(),
         metricsUseCase.getRpMetrics(),
       ]);
+      if (isStale()) return;
 
       setRpMetrics(rpData);
 
@@ -33,6 +37,7 @@ export function useMetricsViewModel(eventId: number | null) {
           metricsUseCase.getEventPhaseMetrics(eventId),
           metricsUseCase.getEventRpMetrics(eventId),
         ]);
+        if (isStale()) return;
         setEventMetrics(eventData);
         setPhaseMetrics(phaseData);
         setEventRpMetrics(eventRpData);
@@ -52,9 +57,10 @@ export function useMetricsViewModel(eventId: number | null) {
 
       setError("");
     } catch (metricsError) {
+      if (isStale()) return;
       setError(metricsError instanceof Error ? metricsError.message : "No fue posible cargar las metricas.");
     } finally {
-      setLoading(false);
+      if (!isStale()) setLoading(false);
     }
   };
 

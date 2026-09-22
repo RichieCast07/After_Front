@@ -13,6 +13,7 @@ export function useClientsViewModel() {
   const [searchPhone, setSearchPhone] = useState("");
   const [searchResult, setSearchResult] = useState<ClientDTO | null>(null);
   const [form, setForm] = useState(initialForm);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -40,22 +41,43 @@ export function useClientsViewModel() {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
-  const createClient = async () => {
-    if (!form.nombre_completo || !form.telefono) {
-      setError("Nombre y telefono son obligatorios.");
+  const resetForm = () => {
+    setForm(initialForm);
+    setEditingId(null);
+    setError("");
+  };
+
+  const handleEdit = (client: ClientDTO) => {
+    setForm({ nombre_completo: client.nombre_completo, telefono: client.telefono });
+    setEditingId(client.id);
+    setError("");
+  };
+
+  const submit = async () => {
+    const cleanName = form.nombre_completo.trim();
+    const cleanPhone = form.telefono.trim();
+
+    if (!cleanName || !cleanPhone) {
+      setError("Nombre y teléfono son obligatorios.");
       return false;
     }
 
     setSaving(true);
     try {
-      const created = await clientsUseCase.createClient(form);
+      if (editingId) {
+        await clientsUseCase.updateClient(editingId, { nombre_completo: cleanName, telefono: cleanPhone });
+      } else {
+        const created = await clientsUseCase.createClient({ nombre_completo: cleanName, telefono: cleanPhone });
+        setSelectedClientId(created.id);
+        setSearchResult(created);
+      }
       setForm(initialForm);
-      setSelectedClientId(created.id);
-      setSearchResult(created);
+      setEditingId(null);
       await loadClients();
       return true;
-    } catch (createError) {
-      setError(createError instanceof Error ? createError.message : "No fue posible crear el cliente.");
+    } catch (submitError) {
+      const fallback = editingId ? "No fue posible actualizar el cliente." : "No fue posible crear el cliente.";
+      setError(submitError instanceof Error ? submitError.message : fallback);
       return false;
     } finally {
       setSaving(false);
@@ -110,12 +132,15 @@ export function useClientsViewModel() {
     setSearchPhone,
     searchResult,
     form,
+    editingId,
     loading,
     saving,
     downloading,
     error,
     handleFormChange,
-    createClient,
+    resetForm,
+    handleEdit,
+    submit,
     searchClient,
     downloadCsv,
     reload: loadClients,

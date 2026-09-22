@@ -16,6 +16,7 @@ interface DashboardShellProps {
   activeTab: string;
   onTabChange: (id: string) => void;
   onLogout: () => void;
+  headerAction?: ReactNode;
   children: ReactNode;
 }
 
@@ -27,6 +28,7 @@ export default function DashboardShell({
   activeTab,
   onTabChange,
   onLogout,
+  headerAction,
   children,
 }: DashboardShellProps) {
   return (
@@ -42,6 +44,7 @@ export default function DashboardShell({
           </div>
 
           <div className="hero-actions">
+            {headerAction ?? null}
             <div className="identity-card">
               <strong>{username}</strong>
               <span>{badge}</span>
@@ -52,19 +55,21 @@ export default function DashboardShell({
           </div>
         </header>
 
-        <nav className="tab-nav" aria-label="Módulos">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`tab-btn${activeTab === tab.id ? " tab-btn-active" : ""}`}
-              onClick={() => onTabChange(tab.id)}
-            >
-              <span className="tab-icon" aria-hidden="true">{tab.icon}</span>
-              <span className="tab-label">{tab.label}</span>
-            </button>
-          ))}
-        </nav>
+        {tabs.length > 0 ? (
+          <nav className="tab-nav" aria-label="Módulos">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`tab-btn${activeTab === tab.id ? " tab-btn-active" : ""}`}
+                onClick={() => onTabChange(tab.id)}
+              >
+                <span className="tab-icon" aria-hidden="true">{tab.icon}</span>
+                <span className="tab-label">{tab.label}</span>
+              </button>
+            ))}
+          </nav>
+        ) : null}
 
         <section className="dashboard-stack">{children}</section>
       </main>

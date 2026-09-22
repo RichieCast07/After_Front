@@ -49,6 +49,7 @@ export function usePhasesViewModel(eventId: number | null) {
   };
 
   const handleEdit = (phase: PhaseDTO) => {
+    setError("");
     setEditingId(phase.id);
     setForm({
       nombre: phase.nombre,
@@ -61,6 +62,7 @@ export function usePhasesViewModel(eventId: number | null) {
   const resetForm = () => {
     setEditingId(null);
     setForm(initialForm);
+    setError("");
   };
 
   const submit = async () => {

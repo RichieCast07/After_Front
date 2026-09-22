@@ -47,9 +47,11 @@ export function useTeamViewModel() {
   const resetForm = () => {
     setForm(initialForm);
     setEditingId(null);
+    setError("");
   };
 
   const handleEdit = (user: UserResponseDTO) => {
+    setError("");
     setForm({
       nombre_completo: user.nombre_completo,
       username: user.username,
@@ -132,6 +134,7 @@ export function useTeamViewModel() {
 
   const deleteUser = async (id: number) => {
     setError("");
+    setSaving(true);
     try {
       await teamUseCase.deleteUser(id);
       await loadUsers();
@@ -139,11 +142,14 @@ export function useTeamViewModel() {
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "No fue posible eliminar el usuario.");
       return false;
+    } finally {
+      setSaving(false);
     }
   };
 
   const toggleActive = async (user: UserResponseDTO) => {
     setError("");
+    setSaving(true);
     try {
       await teamUseCase.updateUser(user.id, { activo: !user.activo });
       await loadUsers();
@@ -151,6 +157,8 @@ export function useTeamViewModel() {
     } catch (toggleError) {
       setError(toggleError instanceof Error ? toggleError.message : "No fue posible actualizar el estado del usuario.");
       return false;
+    } finally {
+      setSaving(false);
     }
   };
 

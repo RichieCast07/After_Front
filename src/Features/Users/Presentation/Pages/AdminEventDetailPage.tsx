@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UserContext from "../../../../Core/Context/UserContext";
+import { formatCurrency } from "../../../../Core/Utils/currency";
 import { formatDateTime } from "../../../../Core/Utils/date";
 import type { EventDTO } from "../../../Events/Data/Models/Event";
 import type { EventTicketTypeDTO, PhaseTicketTypePriceDTO } from "../../../Events/Data/Models/TicketType";
@@ -8,6 +9,7 @@ import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import type { PhaseDTO } from "../../../Phases/Data/Models/Phase";
 import { phasesUseCase } from "../../../Phases/Domain/PhasesUseCase";
 import DashboardShell from "../../../Shared/Presentation/Components/DashboardShell";
+import FormModal from "../../../Shared/Presentation/Components/FormModal";
 
 const initialPhaseForm = {
   nombre: "",
@@ -33,6 +35,10 @@ export default function AdminEventDetailPage() {
   const [newTypeName, setNewTypeName] = useState("");
   const [newTypeInitialPrice, setNewTypeInitialPrice] = useState("");
   const [phaseForm, setPhaseForm] = useState(initialPhaseForm);
+
+  const [typeModalOpen, setTypeModalOpen] = useState(false);
+  const [phaseModalOpen, setPhaseModalOpen] = useState(false);
+  const [priceModal, setPriceModal] = useState<{ ticketTypeId: number; nombre: string } | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -103,6 +109,28 @@ export default function AdminEventDetailPage() {
     [phases, selectedPhaseId]
   );
 
+  const openTypeModal = () => {
+    setNewTypeName("");
+    setNewTypeInitialPrice("");
+    setError("");
+    setTypeModalOpen(true);
+  };
+
+  const openPhaseModal = () => {
+    setPhaseForm(initialPhaseForm);
+    setError("");
+    setPhaseModalOpen(true);
+  };
+
+  const openPriceModal = (priceRow: PhaseTicketTypePriceDTO) => {
+    setError("");
+    setPhasePriceDrafts((current) => ({
+      ...current,
+      [priceRow.ticket_type_id]: String(Number(priceRow.precio).toFixed(2)),
+    }));
+    setPriceModal({ ticketTypeId: priceRow.ticket_type_id, nombre: priceRow.nombre });
+  };
+
   const createTicketType = async () => {
     if (!newTypeName.trim()) {
       setError("Escribe el nombre del tipo de boleto.");
@@ -126,6 +154,7 @@ export default function AdminEventDetailPage() {
       });
       setNewTypeName("");
       setNewTypeInitialPrice("");
+      setTypeModalOpen(false);
       await Promise.all([loadEventContext(), loadPhasePrices()]);
     } catch (createError) {
       setError(createError instanceof Error ? createError.message : "No fue posible crear el tipo de boleto.");
@@ -149,6 +178,7 @@ export default function AdminEventDetailPage() {
     setSaving(true);
     try {
       await eventsUseCase.updatePhaseTicketTypePrice(parsedEventId, selectedPhaseId, ticketTypeId, priceDraft);
+      setPriceModal(null);
       await loadPhasePrices();
       setError("");
     } catch (updateError) {
@@ -180,6 +210,7 @@ export default function AdminEventDetailPage() {
       });
 
       setPhaseForm(initialPhaseForm);
+      setPhaseModalOpen(false);
       await loadEventContext();
       setSelectedPhaseId(created.id);
       setError("");
@@ -200,6 +231,128 @@ export default function AdminEventDetailPage() {
       onTabChange={() => undefined}
       onLogout={() => session?.logout()}
     >
+      {typeModalOpen ? (
+        <FormModal
+          title="Agregar tipo de boleto"
+          subtitle="Tipos de boleto"
+          error={error}
+          onClose={() => setTypeModalOpen(false)}
+        >
+          <div className="field-grid">
+            <label>
+              <span>Nombre del tipo</span>
+              <input value={newTypeName} onChange={(event) => setNewTypeName(event.target.value)} placeholder="VIP, BACKSTAGE..." />
+            </label>
+            <label>
+              <span>Precio inicial para fases actuales</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={newTypeInitialPrice}
+                onChange={(event) => setNewTypeInitialPrice(event.target.value)}
+                placeholder={String(selectedPhase?.precio ?? event?.precio_inicial ?? 0)}
+              />
+            </label>
+          </div>
+          <div className="action-row">
+            <button type="button" className="primary-button" disabled={saving} onClick={() => void createTicketType()}>
+              {saving ? "Guardando..." : "Agregar tipo"}
+            </button>
+            <button type="button" className="ghost-button" onClick={() => setTypeModalOpen(false)}>
+              Cancelar
+            </button>
+          </div>
+        </FormModal>
+      ) : null}
+
+      {phaseModalOpen ? (
+        <FormModal
+          title="Crear fase"
+          subtitle="Fases"
+          error={error}
+          onClose={() => setPhaseModalOpen(false)}
+        >
+          <div className="field-grid">
+            <label>
+              <span>Nombre</span>
+              <input value={phaseForm.nombre} onChange={(event) => setPhaseForm((current) => ({ ...current, nombre: event.target.value }))} />
+            </label>
+            <label>
+              <span>Precio base (General)</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={phaseForm.precio}
+                onChange={(event) => setPhaseForm((current) => ({ ...current, precio: event.target.value }))}
+              />
+            </label>
+            <label>
+              <span>Inicio</span>
+              <input
+                type="datetime-local"
+                value={phaseForm.fecha_inicio}
+                onChange={(event) => setPhaseForm((current) => ({ ...current, fecha_inicio: event.target.value }))}
+              />
+            </label>
+            <label>
+              <span>Fin</span>
+              <input
+                type="datetime-local"
+                value={phaseForm.fecha_fin}
+                onChange={(event) => setPhaseForm((current) => ({ ...current, fecha_fin: event.target.value }))}
+              />
+            </label>
+          </div>
+          <div className="action-row">
+            <button type="button" className="primary-button" disabled={saving} onClick={() => void createPhase()}>
+              {saving ? "Creando..." : "Crear fase"}
+            </button>
+            <button type="button" className="ghost-button" onClick={() => setPhaseModalOpen(false)}>
+              Cancelar
+            </button>
+          </div>
+        </FormModal>
+      ) : null}
+
+      {priceModal ? (
+        <FormModal
+          title={`Editar precio · ${priceModal.nombre}`}
+          subtitle={selectedPhase?.nombre ?? "Fase"}
+          error={error}
+          onClose={() => setPriceModal(null)}
+        >
+          <div className="field-grid">
+            <label>
+              <span>Precio ({priceModal.nombre})</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={phasePriceDrafts[priceModal.ticketTypeId] ?? ""}
+                onChange={(event) =>
+                  setPhasePriceDrafts((current) => ({ ...current, [priceModal.ticketTypeId]: event.target.value }))
+                }
+              />
+            </label>
+          </div>
+          <div className="action-row">
+            <button
+              type="button"
+              className="primary-button"
+              disabled={saving}
+              onClick={() => void updatePriceByType(priceModal.ticketTypeId)}
+            >
+              {saving ? "Guardando..." : "Guardar precio"}
+            </button>
+            <button type="button" className="ghost-button" onClick={() => setPriceModal(null)}>
+              Cancelar
+            </button>
+          </div>
+        </FormModal>
+      ) : null}
+
       <section className="glass-panel panel-grid event-detail-page">
         <div className="panel-heading">
           <div>
@@ -215,7 +368,7 @@ export default function AdminEventDetailPage() {
         </div>
 
         {loading ? <p className="muted-copy">Cargando detalle...</p> : null}
-        {error ? <p className="inline-error">{error}</p> : null}
+        {error && !typeModalOpen && !phaseModalOpen && !priceModal ? <p className="inline-error">{error}</p> : null}
 
         <div className="stats-grid">
           <article className="stat-card">
@@ -237,31 +390,10 @@ export default function AdminEventDetailPage() {
             <div className="panel-heading">
               <div>
                 <span className="eyebrow">Tipos de boleto</span>
-                <h2>Agregar tipo</h2>
+                <h2>Tipos de boleto</h2>
               </div>
-            </div>
-
-            <div className="field-grid">
-              <label>
-                <span>Nombre del tipo</span>
-                <input value={newTypeName} onChange={(event) => setNewTypeName(event.target.value)} placeholder="VIP, BACKSTAGE..." />
-              </label>
-              <label>
-                <span>Precio inicial para fases actuales</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={newTypeInitialPrice}
-                  onChange={(event) => setNewTypeInitialPrice(event.target.value)}
-                  placeholder={String(selectedPhase?.precio ?? event?.precio_inicial ?? 0)}
-                />
-              </label>
-            </div>
-
-            <div className="action-row event-detail-actions">
-              <button type="button" className="primary-button" disabled={saving} onClick={() => void createTicketType()}>
-                {saving ? "Guardando..." : "Agregar tipo"}
+              <button type="button" className="primary-button" onClick={openTypeModal}>
+                Agregar tipo
               </button>
             </div>
 
@@ -274,6 +406,9 @@ export default function AdminEventDetailPage() {
                   </div>
                 </article>
               ))}
+              {ticketTypes.length === 0 && !loading ? (
+                <p className="muted-copy">Este evento aún no tiene tipos de boleto.</p>
+              ) : null}
             </div>
           </div>
 
@@ -281,46 +416,10 @@ export default function AdminEventDetailPage() {
             <div className="panel-heading">
               <div>
                 <span className="eyebrow">Fases</span>
-                <h2>Crear fase</h2>
+                <h2>Precios por fase</h2>
               </div>
-            </div>
-
-            <div className="field-grid">
-              <label>
-                <span>Nombre</span>
-                <input value={phaseForm.nombre} onChange={(event) => setPhaseForm((current) => ({ ...current, nombre: event.target.value }))} />
-              </label>
-              <label>
-                <span>Precio base (General)</span>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={phaseForm.precio}
-                  onChange={(event) => setPhaseForm((current) => ({ ...current, precio: event.target.value }))}
-                />
-              </label>
-              <label>
-                <span>Inicio</span>
-                <input
-                  type="datetime-local"
-                  value={phaseForm.fecha_inicio}
-                  onChange={(event) => setPhaseForm((current) => ({ ...current, fecha_inicio: event.target.value }))}
-                />
-              </label>
-              <label>
-                <span>Fin</span>
-                <input
-                  type="datetime-local"
-                  value={phaseForm.fecha_fin}
-                  onChange={(event) => setPhaseForm((current) => ({ ...current, fecha_fin: event.target.value }))}
-                />
-              </label>
-            </div>
-
-            <div className="action-row event-detail-actions">
-              <button type="button" className="primary-button" disabled={saving} onClick={() => void createPhase()}>
-                {saving ? "Creando..." : "Crear fase"}
+              <button type="button" className="primary-button" onClick={openPhaseModal}>
+                Crear fase
               </button>
             </div>
 
@@ -330,7 +429,9 @@ export default function AdminEventDetailPage() {
                 id="event-detail-phase"
                 value={selectedPhaseId ?? ""}
                 onChange={(event) => setSelectedPhaseId(Number(event.target.value))}
+                disabled={!phases.length}
               >
+                {phases.length === 0 ? <option value="">Sin fases</option> : null}
                 {phases.map((phase) => (
                   <option key={phase.id} value={phase.id}>
                     {phase.nombre}
@@ -347,27 +448,18 @@ export default function AdminEventDetailPage() {
                     <small>{selectedPhase?.nombre ?? "Fase"}</small>
                   </div>
                   <div className="collection-actions">
-                    <input
-                      className="event-price-input"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={phasePriceDrafts[priceRow.ticket_type_id] ?? ""}
-                      onChange={(event) =>
-                        setPhasePriceDrafts((current) => ({ ...current, [priceRow.ticket_type_id]: event.target.value }))
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="ghost-button"
-                      disabled={saving}
-                      onClick={() => void updatePriceByType(priceRow.ticket_type_id)}
-                    >
-                      Guardar
+                    <span className="pill pill-success">{formatCurrency(priceRow.precio)}</span>
+                    <button type="button" className="ghost-button" onClick={() => openPriceModal(priceRow)}>
+                      Editar
                     </button>
                   </div>
                 </article>
               ))}
+              {phasePrices.length === 0 && !loading ? (
+                <p className="muted-copy">
+                  {phases.length === 0 ? "Crea una fase para definir precios." : "No hay precios por tipo en esta fase."}
+                </p>
+              ) : null}
             </div>
           </div>
         </div>
