@@ -45,9 +45,13 @@ export default function RPDashboard() {
   );
 
   const selectedEvent = eventsVm.events.find((event) => event.id === eventsVm.selectedEventId);
-  const canGenerateTicket = Boolean(
+  const hasPriceConfigured = Boolean(
     selectedEvent && (phasesVm.phases.length > 0 || Number(selectedEvent.precio_inicial ?? 0) > 0)
   );
+  // Mientras las fases siguen cargando, no sabemos todavía si el evento tiene
+  // fases o no: no lo tratamos como "sin fases" para evitar el falso mensaje
+  // de advertencia mientras la petición sigue en curso.
+  const canGenerateTicket = Boolean(selectedEvent) && (hasPriceConfigured || phasesVm.loading);
 
   // ===== Ventas (historial completo del RP, con filtro por evento) =====
   const salesEvents = useMemo(() => {
@@ -358,7 +362,8 @@ export default function RPDashboard() {
           </div>
 
           {clientLookupMessage ? <p className="muted-copy">{clientLookupMessage}</p> : null}
-          {!canGenerateTicket ? (
+          {phasesVm.error ? <p className="inline-error">No fue posible cargar las fases del evento: {phasesVm.error}</p> : null}
+          {!phasesVm.error && !canGenerateTicket ? (
             <p className="inline-error">
               El evento no tiene fases ni precio inicial configurado. Pide al admin definir al menos una fase o precio inicial.
             </p>
