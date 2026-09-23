@@ -1,7 +1,7 @@
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import afterLogo from "../../../../assets/after.jpg";
+import ticketBackground from "../../../../assets/ticket-background.jpg";
 import { formatDateTime, formatLongDate } from "../../../../Core/Utils/date";
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import "../../../Shared/Presentation/Components/dashboard-shell.css";
@@ -141,7 +141,7 @@ export default function PublicTicketPage() {
         {error ? <p className="inline-error">{error}</p> : null}
 
         {ticket ? (
-          <div className="qr-ticket-preview" style={{ backgroundImage: `url(${afterLogo})` }}>
+          <div className="qr-ticket-preview" style={{ backgroundImage: `url(${ticketBackground})` }}>
             <div className="qr-ticket-overlay" />
             {displayEventDate ? (
               <div className="qr-ticket-date-vertical" aria-label={displayEventDate}>

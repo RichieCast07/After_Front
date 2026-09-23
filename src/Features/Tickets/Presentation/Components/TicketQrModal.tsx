@@ -1,7 +1,7 @@
 import html2canvas from "html2canvas";
 import QRCode from "qrcode";
 import { useEffect, useRef, useState } from "react";
-import afterLogo from "../../../../assets/after.jpg";
+import ticketBackground from "../../../../assets/ticket-background.jpg";
 import { formatDateTime, formatLongDate } from "../../../../Core/Utils/date";
 import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import type { TicketDTO } from "../../Data/Models/Ticket";
@@ -161,7 +161,7 @@ export default function TicketQrModal({ ticket, eventName, onClose }: TicketQrMo
         {qrError ? <p className="inline-error">{qrError}</p> : null}
         {downloadError ? <p className="inline-error">{downloadError}</p> : null}
 
-        <div className="qr-ticket-preview" ref={ticketCardRef} style={{ backgroundImage: `url(${afterLogo})` }}>
+        <div className="qr-ticket-preview" ref={ticketCardRef} style={{ backgroundImage: `url(${ticketBackground})` }}>
           <div className="qr-ticket-overlay" />
           {displayEventDate ? (
             <div className="qr-ticket-date-vertical" aria-label={displayEventDate}>
