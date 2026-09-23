@@ -35,6 +35,8 @@ export default function AdminEventDetailPage() {
   const [newTypeName, setNewTypeName] = useState("");
   const [newTypeInitialPrice, setNewTypeInitialPrice] = useState("");
   const [phaseForm, setPhaseForm] = useState(initialPhaseForm);
+  const [newPhaseTypeDrafts, setNewPhaseTypeDrafts] = useState<Record<number, string>>({});
+  const [touchedTypePrices, setTouchedTypePrices] = useState<Record<number, boolean>>({});
 
   const [typeModalOpen, setTypeModalOpen] = useState(false);
   const [phaseModalOpen, setPhaseModalOpen] = useState(false);
@@ -119,6 +121,21 @@ export default function AdminEventDetailPage() {
   const openPhaseModal = () => {
     setPhaseForm(initialPhaseForm);
     setError("");
+
+    const fallbackPrice = Number(selectedPhase?.precio ?? event?.precio_inicial ?? 0);
+    setNewPhaseTypeDrafts(
+      Object.fromEntries(
+        ticketTypes
+          .filter((ticketType) => ticketType.activo)
+          .map((ticketType) => {
+            const existingPrice = phasePrices.find((priceRow) => priceRow.ticket_type_id === ticketType.id)?.precio;
+            const price = existingPrice !== undefined ? Number(existingPrice) : fallbackPrice;
+            return [ticketType.id, String(price.toFixed(2))];
+          })
+      )
+    );
+
+    setTouchedTypePrices({});
     setPhaseModalOpen(true);
   };
 
@@ -222,6 +239,20 @@ export default function AdminEventDetailPage() {
       return;
     }
 
+    // Solo se envían los tipos que el admin editó a mano: los demás quedan con el precio
+    // que el backend ya hereda automáticamente de la fase anterior al crear la fase.
+    const typePriceEntries = Object.entries(newPhaseTypeDrafts)
+      .filter(([ticketTypeId]) => touchedTypePrices[Number(ticketTypeId)])
+      .map(([ticketTypeId, value]) => ({
+        ticketTypeId: Number(ticketTypeId),
+        precio: Number(value),
+      }));
+    const invalidTypePrice = typePriceEntries.find((entry) => !Number.isFinite(entry.precio) || entry.precio < 0);
+    if (invalidTypePrice) {
+      setError("Hay un precio inválido en los tipos de boleto.");
+      return;
+    }
+
     setSaving(true);
     try {
       const created = await phasesUseCase.createPhase(parsedEventId, {
@@ -231,7 +262,14 @@ export default function AdminEventDetailPage() {
         fecha_fin: phaseForm.fecha_fin,
       });
 
+      await Promise.all(
+        typePriceEntries.map((entry) =>
+          eventsUseCase.updatePhaseTicketTypePrice(parsedEventId, created.id, entry.ticketTypeId, entry.precio)
+        )
+      );
+
       setPhaseForm(initialPhaseForm);
+      setNewPhaseTypeDrafts({});
       setPhaseModalOpen(false);
       await loadEventContext();
       setSelectedPhaseId(created.id);
@@ -327,6 +365,33 @@ export default function AdminEventDetailPage() {
               />
             </label>
           </div>
+
+          {ticketTypes.filter((ticketType) => ticketType.activo).length > 0 ? (
+            <div className="form-stack">
+              <span className="eyebrow">Precios por tipo de boleto en esta fase</span>
+              <div className="field-grid">
+                {ticketTypes
+                  .filter((ticketType) => ticketType.activo)
+                  .map((ticketType) => (
+                    <label key={ticketType.id}>
+                      <span>{ticketType.nombre}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={newPhaseTypeDrafts[ticketType.id] ?? ""}
+                        onChange={(event) => {
+                          const nextValue = event.target.value;
+                          setNewPhaseTypeDrafts((current) => ({ ...current, [ticketType.id]: nextValue }));
+                          setTouchedTypePrices((current) => ({ ...current, [ticketType.id]: true }));
+                        }}
+                      />
+                    </label>
+                  ))}
+              </div>
+            </div>
+          ) : null}
+
           <div className="action-row">
             <button type="button" className="primary-button" disabled={saving} onClick={() => void createPhase()}>
               {saving ? "Creando..." : "Crear fase"}
