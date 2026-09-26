@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { Navigate, Outlet, useLocation, useNavigate, useOutletContext } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import UserContext from "../../../../Core/Context/UserContext";
 import { useEventsViewModel } from "../../../Events/Presentation/ViewModels/useEventsViewModel";
 import type { NavTab } from "../../../Shared/Presentation/Components/DashboardShell";
@@ -7,10 +7,6 @@ import DashboardShell from "../../../Shared/Presentation/Components/DashboardShe
 import AdminClientsTabPage from "./AdminClientsTabPage";
 import AdminEventSelectionPage from "./AdminEventSelectionPage";
 import AdminTeamTabPage from "./AdminTeamTabPage";
-
-export interface AdminLayoutContext {
-  eventsVm: ReturnType<typeof useEventsViewModel>;
-}
 
 const CHOSEN_EVENT_KEY = "after.admin.chosenEventId";
 
@@ -37,10 +33,6 @@ function readStoredEventId(): number | null {
   const raw = sessionStorage.getItem(CHOSEN_EVENT_KEY);
   const id = raw ? Number(raw) : NaN;
   return Number.isFinite(id) && id > 0 ? id : null;
-}
-
-export function useAdminLayoutContext() {
-  return useOutletContext<AdminLayoutContext>();
 }
 
 export default function AdminLayoutPage() {

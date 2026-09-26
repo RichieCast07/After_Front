@@ -7,6 +7,10 @@ import { ticketsUseCase } from "../../../Tickets/Domain/TicketsUseCase";
 
 type ScanState = "idle" | "requesting" | "scanning" | "success" | "error" | "unsupported";
 
+interface BarcodeDetectorLike {
+  detect(source: HTMLVideoElement): Promise<Array<{ rawValue: string }>>;
+}
+
 function getCameraErrorMessage(error: unknown): string {
   const name = (error as { name?: string })?.name;
 
@@ -58,7 +62,7 @@ export default function ManagerScannerPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const detectorRef = useRef<any>(null);
+  const detectorRef = useRef<BarcodeDetectorLike | null>(null);
   const scanTimerRef = useRef<number | null>(null);
 
   const [scanState, setScanState] = useState<ScanState>("idle");
@@ -226,7 +230,7 @@ export default function ManagerScannerPage() {
         await validateAndConsumeTicket(String(qrCode.data));
       }
     } catch {
-      
+      // ignore decode failures on this frame, next tick retries
     }
   };
 
@@ -235,7 +239,7 @@ export default function ManagerScannerPage() {
       return;
     }
 
-    const BarcodeDetectorApi = (window as any).BarcodeDetector;
+    const BarcodeDetectorApi = (window as unknown as { BarcodeDetector?: new (opts: { formats: string[] }) => BarcodeDetectorLike }).BarcodeDetector;
 
     if (!navigator.mediaDevices?.getUserMedia) {
       setScanState("unsupported");

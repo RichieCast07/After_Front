@@ -8,7 +8,7 @@ import { useMetricsViewModel } from "../../../Metrics/Presentation/ViewModels/us
 import FormModal from "../../../Shared/Presentation/Components/FormModal";
 import type { TicketDTO } from "../../../Tickets/Data/Models/Ticket";
 import { ticketsUseCase } from "../../../Tickets/Domain/TicketsUseCase";
-import { useAdminLayoutContext } from "./AdminLayoutPage";
+import { useAdminLayoutContext } from "./AdminLayoutContext";
 
 export default function AdminMetricsTabPage() {
   const navigate = useNavigate();

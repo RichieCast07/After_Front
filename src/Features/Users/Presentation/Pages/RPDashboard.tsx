@@ -123,11 +123,12 @@ export default function RPDashboard() {
     }
   };
 
-  useEffect(() => {
-    if (eventsVm.selectedEventId && activeTab === "eventos") {
+  const handleSelectEvent = (id: number | null) => {
+    eventsVm.setSelectedEventId(id);
+    if (id && activeTab === "eventos") {
       setActiveTab("generar");
     }
-  }, [eventsVm.selectedEventId]);
+  };
 
   useEffect(() => {
     if (!eventsVm.selectedEventId) return;
@@ -192,7 +193,7 @@ export default function RPDashboard() {
         <EventsPanel
           events={upcomingEvents}
           selectedEventId={eventsVm.selectedEventId}
-          setSelectedEventId={eventsVm.setSelectedEventId}
+          setSelectedEventId={handleSelectEvent}
           loading={eventsVm.loading}
           saving={eventsVm.saving}
           error={eventsVm.error}

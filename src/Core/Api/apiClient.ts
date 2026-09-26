@@ -33,10 +33,25 @@ function getToken() {
   }
 }
 
+function handleExpiredSession() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.removeItem("after.user.session");
+  if (window.location.pathname !== "/") {
+    window.location.href = "/";
+  }
+}
+
 async function parseResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get("content-type") ?? "";
   const isJson = contentType.includes("application/json");
   const payload = isJson ? await response.json() : await response.text();
+
+  if (response.status === 401) {
+    handleExpiredSession();
+  }
 
   if (!response.ok) {
     const message =

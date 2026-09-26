@@ -4,7 +4,7 @@ import { formatDateTime } from "../../../../Core/Utils/date";
 import type { TicketDTO } from "../../../Tickets/Data/Models/Ticket";
 import { ticketsUseCase } from "../../../Tickets/Domain/TicketsUseCase";
 import TicketQrModal from "../../../Tickets/Presentation/Components/TicketQrModal";
-import { useAdminLayoutContext } from "./AdminLayoutPage";
+import { useAdminLayoutContext } from "./AdminLayoutContext";
 
 type TicketFilter = "activos" | "usados";
 

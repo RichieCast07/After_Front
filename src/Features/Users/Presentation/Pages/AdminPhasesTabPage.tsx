@@ -5,7 +5,7 @@ import { eventsUseCase } from "../../../Events/Domain/EventsUseCase";
 import PhasesPanel from "../../../Phases/Presentation/Components/PhasesPanel";
 import { usePhasesViewModel } from "../../../Phases/Presentation/ViewModels/usePhasesViewModel";
 import FormModal from "../../../Shared/Presentation/Components/FormModal";
-import { useAdminLayoutContext } from "./AdminLayoutPage";
+import { useAdminLayoutContext } from "./AdminLayoutContext";
 
 export default function AdminPhasesTabPage() {
   const { eventsVm } = useAdminLayoutContext();
