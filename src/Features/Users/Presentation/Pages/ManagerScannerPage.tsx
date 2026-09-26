@@ -64,6 +64,7 @@ export default function ManagerScannerPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const detectorRef = useRef<BarcodeDetectorLike | null>(null);
   const scanTimerRef = useRef<number | null>(null);
+  const processingRef = useRef(false);
 
   const [scanState, setScanState] = useState<ScanState>("idle");
   const [lastCode, setLastCode] = useState("");
@@ -144,10 +145,11 @@ export default function ManagerScannerPage() {
 
   const validateAndConsumeTicket = async (rawCode: string) => {
     const code = extractTicketCode(rawCode);
-    if (!code || busy || resultModal.open) {
+    if (!code || processingRef.current || resultModal.open) {
       return;
     }
 
+    processingRef.current = true;
     setBusy(true);
     try {
       const ticket = await ticketsUseCase.getTicketByCode(code);
@@ -176,12 +178,13 @@ export default function ManagerScannerPage() {
         detail: errorMessage,
       });
     } finally {
+      processingRef.current = false;
       setBusy(false);
     }
   };
 
   const scanFrame = async () => {
-    if (!videoRef.current || busy) {
+    if (!videoRef.current || processingRef.current) {
       return;
     }
 
